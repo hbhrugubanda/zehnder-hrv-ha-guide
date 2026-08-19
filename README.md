@@ -198,7 +198,7 @@ A humidity sensor in the bathroom itself is the upgrade here — it reacts withi
 
 ### Boost while the rangehood runs
 
-Cooking is the biggest single moisture and odour event in most houses, and unlike a shower it has an obvious on/off signal already wired into the kitchen.
+Cooking is the biggest single moisture and odour event in most houses, and unlike a shower it comes with an obvious on/off signal already wired into the kitchen. If your hood recirculates rather than ducting outside — as the one in this example does — the ventilation unit is the only thing actually removing that moisture from the house, which makes this the automation to get right.
 
 ```yaml
 alias: Ventilation - Boost while the rangehood runs
@@ -228,28 +228,40 @@ actions:
       preset_mode: auto
 ```
 
-The 15 minute run-on is the point of the automation. Odour and moisture linger well after the pan comes off the heat, and this clears them without anyone remembering to do anything. The two hour timeout is a safety net, so a rangehood left on all day cannot strand the unit at full speed forever.
+The 15 minute run-on is the point of the automation. Steam and cooking smells linger well after the pan comes off the heat, and this clears them without anyone remembering to do anything. The two hour timeout is a safety net, so a rangehood left on all day cannot strand the unit at full speed forever.
 
 **If your rangehood isn't smart.** Most aren't. Two retrofits, in order of preference:
 
 - **A power-monitoring smart plug or in-line energy meter.** Trigger on watts instead of a switch state — swap the two triggers for `numeric_state` on the power sensor, `above: 20` to start and `below: 10` to stop. Thresholds depend on the appliance; watch the sensor while it runs and pick numbers either side of its idle draw.
 - **The rangehood light as a proxy.** Crude, but most people put the light on when they start cooking. Trigger on the light entity instead. Expect false positives when someone just wants the light.
 
-### Cooking, ventilation and pressure
+### Why this one matters with a recirculating hood
 
-Worth understanding before you rely on this, because it is the one place where MVHR and a rangehood genuinely interact.
+The hood in this example is a **recirculating** type — grease filter, carbon filter, air blown back into the kitchen. No duct to outside. That is increasingly the default in apartments and airtight new builds, and it changes what the automation is for.
 
-A ducted rangehood is **extract only**, and often moves far more air than the MVHR does — 400 to 700 m³/h is common, against roughly 235 m³/h on the reference unit at full speed. While it runs, it pulls the house negative: more air is leaving than arriving, and the shortfall gets sucked in through whatever gaps exist.
+A recirculating hood traps grease and takes the edge off odours. **It removes no moisture whatsoever.** Every gram of steam off a boiling pan stays inside the house. The only route out is the MVHR's kitchen extract point.
 
-Two consequences follow.
+So this automation is not a refinement. With a recirculating hood it *is* your cooking moisture strategy — the boost is the mechanism that actually removes the water, and the hood is only telling it when to start.
 
-> **Safety — open-flued appliances.** If you have a wood burner, an open fire, or a gas heater or water heater with an open flue, a powerful rangehood can reverse the flue and pull combustion gases, including carbon monoxide, back into the room. This is a property of the rangehood and the building, not of Home Assistant, and no automation in this guide fixes it. If that describes your house, fit a carbon monoxide alarm and talk to a heating engineer about dedicated makeup air. Do not treat an MVHR boost as a substitute.
+Three things follow from that.
 
-Second, and more mundane: **boosting a balanced MVHR does not act as makeup air.** The ComfoAir Q raises supply and extract together, so pushing it to 100% increases incoming air but increases outgoing air by roughly the same amount. The net pressure effect is small. What the boost genuinely buys you is faster clearance of the moisture and cooking smells that escape the hood and drift through the house — which is the real reason to run this automation.
+- **The carbon filter fades, and the MVHR picks up the slack.** Carbon saturates and stops adsorbing odour long before it looks dirty. Replace it on the manufacturer's schedule, typically every few months of regular cooking. Note that `sensor.comfoairq_days_to_replace_filter` tracks the *ventilation unit's* filters only — it knows nothing about your hood.
+- **No pressure problem to worry about.** Nothing leaves the building, so a recirculating hood cannot depressurise the house or backdraft a flue. The safety note in the next section does not apply to you.
+- **Keep an eye on the kitchen extract valve.** The hood catches most airborne grease, but not all of it, and what escapes ends up at the MVHR's kitchen valve. Wipe it when you change the unit's filters.
 
-If your rangehood is a **recirculating** type with a carbon filter rather than a duct to outside, none of the pressure discussion applies — nothing is being extracted at all. In that case the MVHR is doing all the actual air changing, and this automation matters more, not less.
+**One overlap to be aware of.** The humidity boost earlier in this guide will eventually notice cooking too, because that steam reaches the extract air in the end. The rangehood trigger is simply the faster signal — it fires the moment someone starts cooking, rather than after the blended extract sensor has drifted upward. Running both is fine, and the rare case where they collide is a shower during cooking: whichever finishes first hands control back to `auto`, and the other reasserts on its next threshold crossing. Not worth engineering around unless it annoys you.
 
-**Never duct a rangehood into the MVHR system.** Cooking grease will coat the heat exchanger and ductwork, and it is not designed to be cleaned of it. The two systems stay separate; the MVHR's own kitchen extract point is deliberately sited away from the hob.
+### If your hood is ducted instead
+
+Most of the above flips, so this is for readers who don't have the setup described here.
+
+A ducted hood is **extract only** and often moves far more air than the ventilation unit does — 400 to 700 m³/h is common, against roughly 235 m³/h on the reference unit at full speed. While it runs it pulls the house negative, and the shortfall is drawn in through whatever gaps exist.
+
+> **Safety — open-flued appliances.** If you have a wood burner, an open fire, or a gas heater or water heater with an open flue, a powerful ducted rangehood can reverse the flue and pull combustion gases, including carbon monoxide, back into the room. This is a property of the rangehood and the building, not of Home Assistant, and no automation in this guide fixes it. If that describes your house, fit a carbon monoxide alarm and speak to a heating engineer about dedicated makeup air. Do not treat a ventilation boost as a substitute.
+
+It is also worth knowing that **boosting a balanced MVHR is not makeup air.** The ComfoAir Q raises supply and extract together, so pushing it to 100% brings in more air but sends out roughly as much. The net pressure effect is small. What the boost buys with a ducted hood is faster clearance of whatever escapes the hood and drifts through the house — useful, but a smaller job than it does in the recirculating case.
+
+**Whichever type you have: never duct a rangehood into the MVHR system.** Cooking grease will coat the heat exchanger and ductwork, and neither is designed to be cleaned of it. The two systems stay separate, which is why the unit's own kitchen extract point is deliberately sited away from the hob.
 
 ### Wind down when the house is empty
 
