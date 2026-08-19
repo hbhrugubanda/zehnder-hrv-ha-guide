@@ -196,6 +196,61 @@ Two other details worth keeping: `for: "00:05:00"` stops a brief blip from trigg
 
 A humidity sensor in the bathroom itself is the upgrade here — it reacts within seconds rather than minutes. Swap the entity in both places if you add one.
 
+### Boost while the rangehood runs
+
+Cooking is the biggest single moisture and odour event in most houses, and unlike a shower it has an obvious on/off signal already wired into the kitchen.
+
+```yaml
+alias: Ventilation - Boost while the rangehood runs
+description: Boosts ventilation while the rangehood is on and for 15 minutes after, then returns control to the unit.
+mode: restart
+triggers:
+  - trigger: state
+    entity_id: switch.rangehood
+    to: "on"
+actions:
+  - action: fan.set_percentage
+    target:
+      entity_id: fan.comfoairq
+    data:
+      percentage: 100
+  - wait_for_trigger:
+      - trigger: state
+        entity_id: switch.rangehood
+        to: "off"
+    timeout: "02:00:00"
+    continue_on_timeout: true
+  - delay: "00:15:00"
+  - action: fan.set_preset_mode
+    target:
+      entity_id: fan.comfoairq
+    data:
+      preset_mode: auto
+```
+
+The 15 minute run-on is the point of the automation. Odour and moisture linger well after the pan comes off the heat, and this clears them without anyone remembering to do anything. The two hour timeout is a safety net, so a rangehood left on all day cannot strand the unit at full speed forever.
+
+**If your rangehood isn't smart.** Most aren't. Two retrofits, in order of preference:
+
+- **A power-monitoring smart plug or in-line energy meter.** Trigger on watts instead of a switch state — swap the two triggers for `numeric_state` on the power sensor, `above: 20` to start and `below: 10` to stop. Thresholds depend on the appliance; watch the sensor while it runs and pick numbers either side of its idle draw.
+- **The rangehood light as a proxy.** Crude, but most people put the light on when they start cooking. Trigger on the light entity instead. Expect false positives when someone just wants the light.
+
+### Cooking, ventilation and pressure
+
+Worth understanding before you rely on this, because it is the one place where MVHR and a rangehood genuinely interact.
+
+A ducted rangehood is **extract only**, and often moves far more air than the MVHR does — 400 to 700 m³/h is common, against roughly 235 m³/h on the reference unit at full speed. While it runs, it pulls the house negative: more air is leaving than arriving, and the shortfall gets sucked in through whatever gaps exist.
+
+Two consequences follow.
+
+> **Safety — open-flued appliances.** If you have a wood burner, an open fire, or a gas heater or water heater with an open flue, a powerful rangehood can reverse the flue and pull combustion gases, including carbon monoxide, back into the room. This is a property of the rangehood and the building, not of Home Assistant, and no automation in this guide fixes it. If that describes your house, fit a carbon monoxide alarm and talk to a heating engineer about dedicated makeup air. Do not treat an MVHR boost as a substitute.
+
+Second, and more mundane: **boosting a balanced MVHR does not act as makeup air.** The ComfoAir Q raises supply and extract together, so pushing it to 100% increases incoming air but increases outgoing air by roughly the same amount. The net pressure effect is small. What the boost genuinely buys you is faster clearance of the moisture and cooking smells that escape the hood and drift through the house — which is the real reason to run this automation.
+
+If your rangehood is a **recirculating** type with a carbon filter rather than a duct to outside, none of the pressure discussion applies — nothing is being extracted at all. In that case the MVHR is doing all the actual air changing, and this automation matters more, not less.
+
+**Never duct a rangehood into the MVHR system.** Cooking grease will coat the heat exchanger and ductwork, and it is not designed to be cleaned of it. The two systems stay separate; the MVHR's own kitchen extract point is deliberately sited away from the hob.
+
 ### Wind down when the house is empty
 
 ```yaml
@@ -297,7 +352,6 @@ actions:
 
 Things the sensors support that are worth building once the basics work:
 
-- **Cooking boost** — a kitchen temperature or humidity sensor rising quickly, same shape as the humidity boost above but reacting faster than the extract sensor can.
 - **CO₂ boost** — if you own an air quality sensor, boost on CO₂ rather than humidity. Better proxy for "too many people in here".
 - **Quiet overnight** — drop to Low at bedtime, back to `auto` in the morning. Worth it if the unit is audible in a bedroom.
 - **Pollen or poor air quality outside** — drop to Low when an outdoor air quality sensor spikes, so you pull in less of it.
