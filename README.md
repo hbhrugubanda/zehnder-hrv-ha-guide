@@ -35,9 +35,11 @@ Zehnder now sells the **ComfoConnect Pro** in its place. Different box, differen
 
 ## 2. Connect it to Home Assistant
 
-**You do not need HACS, and there is nothing for you to install.** An integration called **[Zehnder ComfoAir Q](https://www.home-assistant.io/integrations/comfoconnect/)** already ships with Home Assistant — it is part of Home Assistant itself, which is why it has a page on the official documentation site rather than a repository you add. What throws people is that it is also one of the few with **no setup screen** — you won't find it under *Settings → Devices & Services*, because you add it by editing a text file and restarting instead. That combination is unusual, but it's expected, not a mistake.
+**You do not need HACS — the community store other guides send you to — and there is nothing for you to install.** An integration called **[Zehnder ComfoAir Q](https://www.home-assistant.io/integrations/comfoconnect/)** already ships with Home Assistant — it is part of Home Assistant itself, which is why it has a page on the official documentation site rather than a repository you add. What throws people is that it is also one of the few with **no setup screen** — you won't find it under *Settings → Devices & Services*, because you add it by editing a text file and restarting instead. That combination is unusual, but it's expected, not a mistake.
 
-Open `configuration.yaml` (the **File editor** app under *Settings → Apps* is the easiest route) and add this to the bottom. Change the IP to your Zehnder device's.
+**Take a backup first** — *Settings → System → Backups*. You are about to edit the file Home Assistant reads on startup, and a stray space in it can stop Home Assistant starting.
+
+Now open `configuration.yaml` and add the block below to the bottom of it, changing the IP to your Zehnder device's. The easiest way in is the **File editor** app under *Settings → Apps*; if you don't have it, install it from that screen first. (Running Home Assistant in Docker or a Python environment? You won't have Apps — edit the file however you normally reach it.)
 
 ```yaml
 comfoconnect:
@@ -76,7 +78,7 @@ Then:
 2. **Settings → System →** power icon → **Restart Home Assistant.**
 3. **Developer tools → States**, filter for `comfoairq`. You should see one `fan.comfoairq` and twenty-one sensors with live numbers.
 
-Take a backup before your first edit (*Settings → System → Backups*). YAML is fussy about indentation, and a bad edit can stop Home Assistant starting.
+Those are your **entities** — Home Assistant's word for one controllable thing or one reading. Each has an **entity ID** like `sensor.comfoairq_inside_temperature`, and that ID is what you point automations and dashboards at for the rest of this guide.
 
 Three notes:
 
@@ -88,7 +90,7 @@ Three notes:
 
 ## 3. What you get
 
-One control and twenty-one readings. Sample values are live readings from the reference unit, so you can see what normal looks like.
+One control and twenty-one readings.
 
 ### The control
 
@@ -246,7 +248,7 @@ Add `sensor.comfoairq_preheater_energy_total` as a second device if you want the
 |---|---|---|
 | Home Assistant won't start after the edit | YAML indentation — a tab, or wrong number of spaces | Restore the backup, re-copy the block rather than retyping it |
 | No `comfoairq` entities at all | Wrong IP, or the Zehnder device is on a different network segment | Confirm the address, check the LAN C's link light |
-| Config check fails naming a resource | Mistyped resource key | See the naming traps table above — six aren't what you'd expect |
+| Config check fails naming a resource | Mistyped resource key | Copy the block in section 2 again rather than retyping it — several keys aren't what you'd guess |
 | Fan appears but sensors don't | The `sensor:` block was missed, or a second `sensor:` key overwrote the first | Confirm `sensor:` appears exactly once at the far left of the file |
 | Worked, then stopped weeks later | The Zehnder device's IP changed | Set a DHCP reservation for the LAN C in your router |
 | Drops out when the Zehnder app is opened | The Zehnder device allows a limited number of registered clients | Remove unused device registrations in the Zehnder app, restart Home Assistant *(commonly reported, not tested here)* |
@@ -275,13 +277,15 @@ If the answer to 1 is no, the follow-up is whether a community integration cover
 
 ---
 
-## Building the PDF
+## A printable copy
+
+If you'd rather have this as a PDF to keep or pass on, clone the repository and run:
 
 ```
 ./build-pdf.sh
 ```
 
-Output lands in `build/`. See the script for what it needs.
+The finished file lands in `build/`.
 
 ---
 
