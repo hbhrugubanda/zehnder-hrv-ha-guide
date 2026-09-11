@@ -78,26 +78,11 @@ Then:
 
 Take a backup before your first edit (*Settings → System → Backups*). YAML is fussy about indentation, and a bad edit can stop Home Assistant starting.
 
-Two notes:
+Three notes:
 
 - If `sensor:` already exists at the far left of your file, don't add a second one. Move just the `- platform: comfoconnect` part underneath the existing `sensor:` line.
 - `name: ComfoAirQ` decides what every entity is called. Leave it alone and every example below works as written.
 - Any later change to this block needs another **restart**, not a YAML reload.
-
-### The naming traps
-
-Six resource keys don't match the entity name you end up with. The block above already has them right — this table is for when you're debugging, or adding one back later.
-
-| What you'd guess | What you must type | Entity you get |
-|---|---|---|
-| `inside_temperature` | `current_temperature` | `sensor.comfoairq_inside_temperature` |
-| `inside_humidity` | `current_humidity` | `sensor.comfoairq_inside_humidity` |
-| `supply_airflow` | `air_flow_supply` | `sensor.comfoairq_supply_airflow` |
-| `exhaust_airflow` | `air_flow_exhaust` | `sensor.comfoairq_exhaust_airflow` |
-| `energy_total` | `power_total` | `sensor.comfoairq_energy_total` |
-| `preheater_energy_total` | `preheater_power_total` | `sensor.comfoairq_preheater_energy_total` |
-
-Also worth knowing: Zehnder's manuals call the air leaving your rooms **extract** air. Home Assistant calls it **inside**, and uses **exhaust** for air leaving the building.
 
 ---
 
@@ -121,6 +106,8 @@ Setting a percentage puts the unit into **manual** mode and leaves it there. Set
 ### The four air streams
 
 An MVHR unit moves air along four paths at once. This is the part worth understanding — it turns a wall of numbers into something useful.
+
+One naming quirk to know first: Zehnder's manuals call the air pulled out of your rooms **extract** air, while Home Assistant calls it **inside** and keeps **exhaust** for the air leaving the building.
 
 | Stream | Meaning | Temperature | Humidity | Live |
 |---|---|---|---|---|
