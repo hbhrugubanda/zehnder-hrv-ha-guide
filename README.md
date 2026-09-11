@@ -260,58 +260,14 @@ Things the sensors support that are worth building once the basics work:
 
 ---
 
-## 5. A dashboard to see it all
+## 5. Putting it on a dashboard
 
-**Add card → Manual**, then paste:
+Every entity is on a dashboard already — Home Assistant builds one automatically — so this is about arranging them rather than getting them to appear. Build what suits you; a few pointers on what works well for a ventilation unit:
 
-```yaml
-type: vertical-stack
-cards:
-  - type: heading
-    heading: Ventilation
-
-  - type: tile
-    entity: fan.comfoairq
-    features:
-      - type: fan-speed
-
-  - type: glance
-    columns: 4
-    entities:
-      - entity: sensor.comfoairq_outside_temperature
-        name: Outside
-      - entity: sensor.comfoairq_supply_temperature
-        name: Supply
-      - entity: sensor.comfoairq_inside_temperature
-        name: Inside
-      - entity: sensor.comfoairq_exhaust_temperature
-        name: Exhaust
-
-  - type: entities
-    title: Air and humidity
-    entities:
-      - entity: sensor.comfoairq_supply_airflow
-        name: Supply airflow
-      - entity: sensor.comfoairq_exhaust_airflow
-        name: Extract airflow
-      - entity: sensor.comfoairq_inside_humidity
-        name: Indoor humidity
-      - entity: sensor.comfoairq_bypass_state
-        name: Summer bypass open
-      - entity: sensor.comfoairq_power_usage
-        name: Power draw
-      - entity: sensor.comfoairq_days_to_replace_filter
-        name: Filters due in
-
-  - type: history-graph
-    hours_to_show: 24
-    entities:
-      - sensor.comfoairq_supply_temperature
-      - sensor.comfoairq_outside_temperature
-      - sensor.comfoairq_inside_temperature
-```
-
-The history graph is the one to keep. The gap between the outside line and the supply line *is* your heat recovery, drawn over time.
+- **The fan tile.** A tile card on `fan.comfoairq` with the *fan speed* feature gives you the whole control surface: current speed, and four buttons to change it.
+- **Temperatures side by side.** A glance card with outside, supply, inside and exhaust in that order reads as the journey air takes through the unit, left to right.
+- **A history graph is the one to keep.** Put supply, outside and inside temperature on one 24-hour graph. The gap between the outside line and the supply line *is* your heat recovery, drawn over time — the single most satisfying thing this integration gives you.
+- **Everything else on an entities card.** Airflow, humidity, bypass state, power draw, filter days. Useful to have, not worth a card each.
 
 ### Energy dashboard
 
