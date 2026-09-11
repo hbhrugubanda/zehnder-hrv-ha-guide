@@ -35,7 +35,7 @@ Zehnder now sells the **ComfoConnect Pro** in its place. Different box, differen
 
 ## 2. Connect it to Home Assistant
 
-**You do not need HACS, and there is nothing to download.** A Zehnder integration called **ComfoConnect** already ships with Home Assistant. What throws people is that it is also one of the few with **no setup screen** — you won't find it under *Settings → Devices & Services*, because you add it by editing a text file and restarting instead. That combination is unusual, but it's expected, not a mistake.
+**You do not need HACS, and there is nothing for you to install.** An integration called **[Zehnder ComfoAir Q](https://www.home-assistant.io/integrations/comfoconnect/)** already ships with Home Assistant — it is part of Home Assistant itself, which is why it has a page on the official documentation site rather than a repository you add. What throws people is that it is also one of the few with **no setup screen** — you won't find it under *Settings → Devices & Services*, because you add it by editing a text file and restarting instead. That combination is unusual, but it's expected, not a mistake.
 
 Open `configuration.yaml` (the **File editor** app under *Settings → Apps* is the easiest route) and add this to the bottom. Change the IP to your Zehnder device's.
 
