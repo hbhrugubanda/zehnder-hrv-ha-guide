@@ -179,7 +179,7 @@ cat > "$HTML" <<HTMLEOF
 <div class="doc-meta">
   <span>Source and updates</span>
   This guide is maintained at <a href="$REPO_URL">$REPO_URL</a>.
-  Corrections and validation results are welcome as issues or pull requests — the ComfoConnect Pro section in particular is waiting on someone with the hardware.
+  Corrections and validation results are welcome as issues or pull requests - the ComfoConnect Pro section in particular is waiting on someone with the hardware.
 </div>
 $BODY
 </body>
