@@ -35,67 +35,20 @@ Zehnder now sells the **ComfoConnect Pro** in its place. Different box, differen
 
 ## 1b. The ComfoConnect Pro
 
-The **ComfoConnect Pro** is what Zehnder sells now instead of the LAN C. Same idea — it joins the unit's ComfoNet bus to your network — but it is a different device with a different way in, and **section 2 does not apply to it**. Home Assistant's built-in integration only speaks the LAN C's language.
+The **ComfoConnect Pro** is what Zehnder sells now instead of the LAN C. Same idea — it joins the unit to your network — but it is a different device, and **section 2 does not apply to it**. Home Assistant's built-in integration only speaks the LAN C's language.
 
-> **Read this as researched, not tested.** Everything else in this guide came off a live LAN C. This section is drawn from Zehnder's own *ComfoConnect PRO installer manual*, which publishes the full interface — so the facts below are Zehnder's, not guesses. What has not been done is sit someone down with a Pro and Home Assistant and prove the round trip. Corrections welcome.
+**It has to be set up first, and it doesn't arrive ready.** Press the **AP** button, join the temporary **ComfoConnectPro** Wi-Fi network it creates (password on the device label), and open **http://comfoconnectpro.local** in a browser. From there, put it on your home network — ethernet or Wi-Fi — and give it a fixed address in your router.
 
-### Getting it on the network
+Then, on that same web page, go to **Protocols & Services** and switch the protocol to **Modbus TCP**. Leave the defaults alone: slave ID 1, port 502. Nothing in Home Assistant can see the Pro until that is on.
 
-Ethernet or Wi-Fi, either is fine. Its own settings live on a small web page it hosts:
+**Modbus is how Home Assistant talks to it.** Two routes, both fine:
 
-1. Press the **AP** button on the side. The Pro creates a temporary Wi-Fi network called **ComfoConnectPro**.
-2. Join it — the password is on the label on the device, and phones can scan the QR code on that label instead.
-3. Open **http://comfoconnectpro.local** (or **http://10.1.1.1** if that doesn't resolve).
-4. Point it at your home Wi-Fi, or just plug in ethernet and skip the wireless setup.
+- **[hstrohmaier/ha_comfoconnectpro](https://github.com/hstrohmaier/ha_comfoconnectpro)**, installed through HACS as a custom repository. Asks for the address, slave ID and port, and does the rest. Written against a ComfoAir Q350.
+- **Home Assistant's own Modbus integration**, which is built in. More setting up — you list the values you want yourself — but nothing third-party involved.
 
-The **Internet** light tells you where you are: green for connected, blue while access point mode is on, purple for WPS, red for no internet. Give it a fixed IP from your router, same as you would a LAN C.
+The Pro can do things the LAN C can't, including away mode, a timed boost and a temperature target. It doesn't report fan speeds or electricity use, so the Energy dashboard trick in section 5 has no equivalent.
 
-### Turning on the bit Home Assistant needs
-
-On that same web page, go to **Protocols & Services** and set the protocol to **Modbus TCP**. The options are *None*, *Modbus TCP* and *Modbus RTU* — pick TCP, since RTU is serial.
-
-Leave the defaults: **slave ID 1** and **TCP port 502**. Zehnder's manual says not to change the port, as 502 is Modbus's standard one. The slave ID can move anywhere in 1–247 if something else on your network already claims 1.
-
-Modbus is an open industrial standard rather than a Zehnder invention, which is the reason the Pro is in some ways easier to work with than the LAN C ever was.
-
-### Two ways into Home Assistant
-
-**A custom component.** [hstrohmaier/ha_comfoconnectpro](https://github.com/hstrohmaier/ha_comfoconnectpro) is a HACS custom repository written for exactly this: ComfoConnect Pro over Modbus TCP, against a ComfoAir Q350. It asks for host, slave ID and port, and creates a climate entity with presets plus sensors. Shortest path, and the least typing.
-
-**Home Assistant's own Modbus integration.** Modbus support is built in, so you can talk to the Pro directly and define the registers you care about in `configuration.yaml`. More work, nothing third-party in the way, and every value in the table below is reachable.
-
-One trap if you go that route: Modbus addresses in Zehnder's table are numbered from 1, but the protocol itself numbers from 0. The manual spells it out — *"registers numbered 1-16 are addressed as 0-15"*. Subtract one, or everything reads back shifted.
-
-### What the Pro exposes
-
-Zehnder publishes the list. Short version of what you can **read**: airflow, five temperatures (room, extract, exhaust, outdoor, supply) and the matching five humidities, CO₂ for up to eight zones, filter days remaining and a filter-dirty flag, standby, ComfoHood, plus an error flag and five active error codes.
-
-What you can **write** is where it pulls ahead of the LAN C:
-
-| | LAN C | Pro |
-|---|---|---|
-| Fan speed | Yes | Yes |
-| Back to automatic | Yes | Yes |
-| **Away mode** | No | **Yes** |
-| **Boost, with a timer** | No | **Yes** |
-| **Temperature profile** (normal / cold / warm) | No | **Yes** |
-| **Target temperature** (external setpoint) | No | **Yes** |
-| **Clear errors** | No | **Yes** |
-| Bypass | Read only | Not exposed |
-| Fan rpm, fan duty, power, energy | Yes | Not exposed |
-
-So it is a trade rather than a straight upgrade: the Pro gives you the controls the LAN C never had — away, boost, comfort profiles, a temperature target — and gives up the diagnostic detail the LAN C is good at, including the electricity meters that feed the Energy dashboard.
-
-Everything in sections 3 to 6 still reads across. Only the entity names, and the way you got them, change.
-
-### Still open
-
-- Does the built-in integration in section 2 fail against a Pro, and with what error in the log?
-- Does `ha_comfoconnectpro` cover the write registers above, or only some?
-- Does the Pro mind several things talking to it at once, the way the LAN C does?
-- Does any of this work on a Q450 or Q600, rather than the Q350 the custom component was written against?
-
-*Source: Zehnder Group, ComfoConnect PRO Installer manual, sections 8–9 — [PDF](https://zehnder.lv/wp-content/uploads/2024/12/ComfoConnect-PRO-Installer-manual.pdf).*
+> **Researched, not tested.** The rest of this guide was written against a live LAN C. This section comes from Zehnder's own [ComfoConnect PRO installer manual](https://zehnder.lv/wp-content/uploads/2024/12/ComfoConnect-PRO-Installer-manual.pdf), which documents the setup and the full Modbus interface — so the details are Zehnder's, but nobody has yet proved the round trip to Home Assistant end to end. Corrections welcome.
 
 ---
 
