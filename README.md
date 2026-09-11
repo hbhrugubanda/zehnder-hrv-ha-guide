@@ -107,7 +107,7 @@ Setting a percentage puts the unit into **manual** mode and leaves it there. Set
 
 ### The four air streams
 
-An MVHR unit moves air along four paths at once. This is the part worth understanding — it turns a wall of numbers into something useful.
+Your unit is an **MVHR** — mechanical ventilation with heat recovery. It moves air along four paths at once, and warms the incoming air with heat taken from the outgoing air. Understanding those four paths is what turns a wall of numbers into something useful.
 
 One naming quirk to know first: Zehnder's manuals call the air pulled out of your rooms **extract** air, while Home Assistant calls it **inside** and keeps **exhaust** for the air leaving the building.
 
