@@ -11,7 +11,7 @@ Repository: <https://github.com/hbhrugubanda/zehnder-hrv-ha-guide>
 You already have all of this working:
 
 - A **Zehnder ComfoAir Q** (Q350 / Q450 / Q600), installed and running.
-- A **ComfoConnect LAN C** gateway, plugged in, on your network, and working in the Zehnder app.
+- A **ComfoConnect LAN C** — the small Zehnder device that puts the unit on your network — plugged in and working in the Zehnder app.
 - A running **Home Assistant**, and you know the LAN C's IP address.
 
 If the Zehnder app can see your unit, you have everything you need. This guide covers only the Home Assistant side.
@@ -26,7 +26,7 @@ Everything below was read off a live LAN C install rather than copied from docum
 
 (There is also an optional HACS version with a proper setup screen and extra controls. It is worth knowing about, but start here — everything in this guide is written against the built-in one. See *[The HACS alternative](#the-hacs-alternative)* at the end of this section.)
 
-Open `configuration.yaml` (the **File editor** app under *Settings → Apps* is the easiest route) and add this to the bottom. Change the IP to your gateway's.
+Open `configuration.yaml` (the **File editor** app under *Settings → Apps* is the easiest route) and add this to the bottom. Change the IP to your Zehnder device's.
 
 ```yaml
 comfoconnect:
@@ -105,7 +105,7 @@ The trade-offs: it is a **custom repository**, so you add it to HACS by URL rath
 
 To install it: HACS → three-dot menu → *Custom repositories* → paste the URL above, type *Integration* → install **Zehnder ComfoAirQ** → restart → *Settings → Devices & Services → Add integration*.
 
-**Run one or the other, not both.** Remove the `comfoconnect:` and `- platform: comfoconnect` blocks from `configuration.yaml` before you switch. Both versions log in to the same gateway, and the LAN C only tolerates so many sessions.
+**Run one or the other, not both.** Remove the `comfoconnect:` and `- platform: comfoconnect` blocks from `configuration.yaml` before you switch. Both versions log in to the same Zehnder device, which only tolerates so many sessions.
 
 ---
 
@@ -432,25 +432,25 @@ Add `sensor.comfoairq_preheater_energy_total` as a second device if you want the
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | Home Assistant won't start after the edit | YAML indentation — a tab, or wrong number of spaces | Restore the backup, re-copy the block rather than retyping it |
-| No `comfoairq` entities at all | Wrong IP, or gateway on a different network segment | Confirm the address, check the LAN C's link light |
+| No `comfoairq` entities at all | Wrong IP, or the Zehnder device is on a different network segment | Confirm the address, check the LAN C's link light |
 | Config check fails naming a resource | Mistyped resource key | See the naming traps table above — six aren't what you'd expect |
 | Fan appears but sensors don't | The `sensor:` block was missed, or a second `sensor:` key overwrote the first | Confirm `sensor:` appears exactly once at the far left of the file |
-| Worked, then stopped weeks later | The gateway's IP changed | Set a DHCP reservation for the LAN C in your router |
-| Drops out when the Zehnder app is opened | The gateway allows a limited number of registered clients | Remove unused device registrations in the Zehnder app, restart Home Assistant *(commonly reported, not tested here)* |
+| Worked, then stopped weeks later | The Zehnder device's IP changed | Set a DHCP reservation for the LAN C in your router |
+| Drops out when the Zehnder app is opened | The Zehnder device allows a limited number of registered clients | Remove unused device registrations in the Zehnder app, restart Home Assistant *(commonly reported, not tested here)* |
 | Fan stuck at one speed | An automation set a percentage and never handed control back | Call `fan.set_preset_mode` with `auto` from **Developer tools → Actions**, then fix the automation |
 
 ---
 
 ## 6. ComfoConnect Pro — not yet validated
 
-**Nothing in this section has been tested.** Everything above was written against a LAN C. The ComfoConnect Pro is Zehnder's newer gateway, and whether Home Assistant's `comfoconnect` integration talks to it is an open question — not a known yes, not a known no.
+**Nothing in this section has been tested.** Everything above was written against a LAN C. The ComfoConnect Pro is the newer Zehnder device that does the same job, and whether Home Assistant's `comfoconnect` integration talks to it is an open question — not a known yes, not a known no.
 
 If you have a Pro, don't assume the config block above works unchanged. This is a checklist for whoever validates it, to be replaced with findings.
 
 | # | Test | A useful answer |
 |---|---|---|
 | 1 | Does the existing integration connect at all? | The exact error from **Settings → System → Logs** after pointing the config at the Pro |
-| 2 | Local connection, or cloud-only? | Whether the gateway answers on the local network with no internet access |
+| 2 | Local connection, or cloud-only? | Whether the Zehnder device answers on the local network with no internet access |
 | 3 | Does pairing behave the same? | Whether a PIN is needed, and whether it registers in the Zehnder app |
 | 4 | Do all twenty-one resources populate? | A list of any that stay unavailable — the resource set may differ |
 | 5 | Does fan control work? | Whether `fan.set_percentage` and `fan.set_preset_mode` actually move the unit |
