@@ -173,122 +173,46 @@ The integration is read-mostly. Worth knowing before you plan anything on top of
 
 This is where the unit gets smarter than its wall controller.
 
-For each one: **Settings → Automations & Scenes → Create automation → Create new automation**, then the three-dot menu top-right → **Edit in YAML**. Delete what's there, paste, save.
+None of these are recipes to copy. Each is one trigger and one or two actions, built under **Settings → Automations & Scenes → Create automation** with the visual editor — no YAML needed. Two entities do nearly all the work:
 
-> **The one rule.** Any automation that sets a percentage takes the unit out of automatic mode and leaves it there. Always finish by setting the preset back to `auto`, or the unit sits at that speed indefinitely.
+- **`fan.comfoairq`** — the unit itself. Either *set percentage* (33 Low, 66 Medium, 100 High) or *set preset mode* back to `auto`.
+- **`sensor.comfoairq_*`** — the numbers you trigger on.
+
+> **The one rule.** Setting a percentage takes the unit out of automatic mode and leaves it there. Every boost must finish by setting the preset back to `auto`, or the unit sits at that speed indefinitely.
 
 ### Boost when the air gets humid
 
 The most useful one by a distance, and it needs no extra hardware — it runs off the unit's own extract humidity sensor.
 
-```yaml
-alias: Ventilation - Boost when indoor humidity climbs
-description: Runs the unit at full speed while extract humidity is high, then returns control to the unit.
-mode: restart
-triggers:
-  - trigger: numeric_state
-    entity_id: sensor.comfoairq_inside_humidity
-    above: 70
-    for: "00:05:00"
-actions:
-  - action: fan.set_percentage
-    target:
-      entity_id: fan.comfoairq
-    data:
-      percentage: 100
-  - wait_for_trigger:
-      - trigger: numeric_state
-        entity_id: sensor.comfoairq_inside_humidity
-        below: 63
-    timeout: "01:00:00"
-    continue_on_timeout: true
-  - action: fan.set_preset_mode
-    target:
-      entity_id: fan.comfoairq
-    data:
-      preset_mode: auto
-```
+**When** `sensor.comfoairq_inside_humidity` stays above 70% for five minutes → **run** the fan at 100% → **wait** until it drops back below 63%, giving up after an hour → **set preset to `auto`**.
 
-**Picking your numbers.** `sensor.comfoairq_inside_humidity` measures the air being pulled out of your wet rooms, so it rises whenever anyone showers, cooks or dries laundry — one trigger covering the whole house. But it is a blend of every extract point, so it moves more slowly and less sharply than a sensor sitting in the bathroom itself.
+**Picking your numbers.** That sensor measures the air being pulled out of your wet rooms, so it rises whenever anyone showers, cooks or dries laundry — one trigger covering the whole house. But it is a blend of every extract point, so it moves more slowly and less sharply than a sensor sitting in the bathroom itself.
 
-Set the thresholds against your own baseline rather than copying mine. Click the sensor in Home Assistant, look at a week of history, and note where it normally sits — on the reference unit that's around 59%. Trigger roughly 10 points above that, and release about 4 points above it. Hence `above: 70` and `below: 63`. If the boost never fires, lower the trigger; if it fires while nothing is happening, raise it.
+Set the thresholds against your own baseline rather than copying mine. Click the sensor in Home Assistant, look at a week of history, and note where it normally sits — on the reference unit that's around 59%. Trigger roughly 10 points above that, and release about 4 points above it. Hence 70% and 63%. If the boost never fires, lower the trigger; if it fires while nothing is happening, raise it.
 
-Two other details worth keeping: `for: "00:05:00"` stops a brief blip from triggering a boost, and `mode: restart` means a second shower mid-boost restarts the timer instead of the automation refusing to run.
+Two other details worth keeping: the five minute delay on the trigger stops a brief blip causing a boost, and setting the automation's run mode to **Restart** means a second shower mid-boost restarts the timer rather than the automation refusing to run.
 
-A humidity sensor in the bathroom itself is the upgrade here — it reacts within seconds rather than minutes. Swap the entity in both places if you add one.
+A humidity sensor in the bathroom itself is the upgrade here — it reacts within seconds rather than minutes. Use it in place of the extract sensor if you add one.
 
 ### Boost while the rangehood runs
 
-An idea rather than a recipe, and the most useful one if your hood recirculates. A recirculating hood filters grease and some odour, then blows the air straight back into the room — the smells never leave the house. Boosting the unit while the hood runs gives them somewhere to go. Whether that is worth automating depends on your kitchen, so treat the numbers below as a starting point.
+An idea rather than a recipe, and the most useful one if your hood recirculates. A recirculating hood filters grease and some odour, then blows the air straight back into the room — the smells never leave the house. Boosting the unit while the hood runs gives them somewhere to go. Whether that is worth automating depends on your kitchen.
 
-```yaml
-alias: Ventilation - Boost while the rangehood runs
-description: Boosts ventilation while the rangehood is on and for 15 minutes after, then returns control to the unit.
-mode: restart
-triggers:
-  - trigger: state
-    entity_id: switch.rangehood
-    to: "on"
-actions:
-  - action: fan.set_percentage
-    target:
-      entity_id: fan.comfoairq
-    data:
-      percentage: 100
-  - wait_for_trigger:
-      - trigger: state
-        entity_id: switch.rangehood
-        to: "off"
-    timeout: "02:00:00"
-    continue_on_timeout: true
-  - delay: "00:15:00"
-  - action: fan.set_preset_mode
-    target:
-      entity_id: fan.comfoairq
-    data:
-      preset_mode: auto
-```
+**When** the rangehood switches on → **run** the fan at 100% → **wait** until it switches off, giving up after two hours → **wait** a further 15 minutes → **set preset to `auto`**.
 
-The 15 minute run-on does most of the work — smells outlast the cooking. The two hour timeout means a hood left on all day cannot strand the unit at full speed.
+The run-on does most of the work — smells outlast the cooking. The two hour cutoff means a hood left on all day cannot strand the unit at full speed.
 
-**If your rangehood isn't smart**, and most aren't, trigger on a power-monitoring smart plug instead — `numeric_state` on the power sensor, `above: 20` to start and `below: 10` to stop, adjusted to whatever the appliance actually draws. The hood light works as a rougher proxy.
+**If your rangehood isn't smart**, and most aren't, trigger on a power-monitoring smart plug instead: boost when its power sensor goes above roughly 20 W and release below 10 W, adjusted to whatever the hood actually draws. The hood light works as a rougher proxy.
 
 Two things worth knowing before you rely on it. The unit raises supply and extract together, so you cannot boost incoming air alone from Home Assistant — a boost moves more air both ways. And if your hood is **ducted** rather than recirculating, it already extracts far more than the unit can, so the boost adds little; in a house with an open-flued appliance, a powerful ducted hood is a backdraft question for a heating engineer rather than something an automation addresses. Either way, never duct a rangehood into the MVHR — the grease has nowhere good to go.
 
 ### Wind down when the house is empty
 
-```yaml
-alias: Ventilation - Away when the house is empty
-description: Drops to the lowest setting once everyone has left.
-mode: single
-triggers:
-  - trigger: numeric_state
-    entity_id: zone.home
-    below: 1
-    for: "00:10:00"
-actions:
-  - action: fan.set_percentage
-    target:
-      entity_id: fan.comfoairq
-    data:
-      percentage: 33
-```
+Two small automations rather than one.
 
-```yaml
-alias: Ventilation - Back to auto when someone comes home
-description: Hands control back to the unit as soon as anyone arrives.
-mode: single
-triggers:
-  - trigger: numeric_state
-    entity_id: zone.home
-    above: 0
-actions:
-  - action: fan.set_preset_mode
-    target:
-      entity_id: fan.comfoairq
-    data:
-      preset_mode: auto
-```
+**When** the number of people in `zone.home` drops below 1 for ten minutes → **run** the fan at 33%.
+
+**When** it rises above 0 → **set preset to `auto`**.
 
 Both need Home Assistant to know who's home — the companion app on at least one phone with location sharing on. Without that, skip them.
 
@@ -296,61 +220,15 @@ Both need Home Assistant to know who's home — the companion app on at least on
 
 Pull cool night air through the house, but only when outside is genuinely cooler than inside.
 
-```yaml
-alias: Ventilation - Summer night purge
-description: Ventilates hard at night when it is warm indoors and cooler outside.
-mode: single
-triggers:
-  - trigger: time
-    at: "22:00:00"
-conditions:
-  - condition: numeric_state
-    entity_id: sensor.comfoairq_inside_temperature
-    above: 23
-  - condition: numeric_state
-    entity_id: sensor.comfoairq_outside_temperature
-    below: sensor.comfoairq_inside_temperature
-actions:
-  - action: fan.set_percentage
-    target:
-      entity_id: fan.comfoairq
-    data:
-      percentage: 100
-  - delay: "03:00:00"
-  - action: fan.set_preset_mode
-    target:
-      entity_id: fan.comfoairq
-    data:
-      preset_mode: auto
-```
+**At** 22:00, **if** `sensor.comfoairq_inside_temperature` is above 23 °C **and** `sensor.comfoairq_outside_temperature` is below the inside temperature → **run** the fan at 100% for three hours → **set preset to `auto`**.
 
-The second condition compares one sensor against another rather than a fixed number. That's what stops it running on a warm night and making things worse.
+That second condition compares one sensor against another rather than against a fixed number — Home Assistant accepts an entity in place of a value. It is what stops the automation running on a warm night and making things worse.
 
 ### Filter reminder
 
-Find your own notify action under **Developer tools → Actions** by typing `notify`.
+**When** `sensor.comfoairq_days_to_replace_filter` drops below 14 → **send** yourself a notification and **add** a filter set to the shopping list.
 
-```yaml
-alias: Ventilation - Filters due soon
-description: Warns two weeks ahead and adds filters to the shopping list.
-mode: single
-triggers:
-  - trigger: numeric_state
-    entity_id: sensor.comfoairq_days_to_replace_filter
-    below: 14
-actions:
-  - action: notify.mobile_app_your_phone
-    data:
-      title: Ventilation filters
-      message: >-
-        Filters are due in
-        {{ states('sensor.comfoairq_days_to_replace_filter') }} days.
-  - action: todo.add_item
-    target:
-      entity_id: todo.shopping_list
-    data:
-      item: Zehnder ComfoAir Q filter set
-```
+Find your own notification action under **Developer tools → Actions** by typing `notify` — the name depends on which phone has the companion app installed.
 
 ### Further ideas, sketched
 
