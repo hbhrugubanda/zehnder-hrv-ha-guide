@@ -22,17 +22,14 @@ Everything below was read off a live LAN C install rather than copied from docum
 
 ## 1. The ComfoConnect LAN C
 
-The ComfoAir Q has no network connection of its own. The **ComfoConnect LAN C** is the small separate box that gives it one: it wires into the unit's ComfoNet bus at one end and into your network by ethernet at the other. Everything in this guide talks to that box, never to the unit directly.
+The ComfoAir Q has no network connection of its own. The **ComfoConnect LAN C** is the small separate box that gives it one — it wires into the unit at one end and into your network at the other. Home Assistant talks to that box, not to the unit itself, and it all happens on your own network with nothing going via Zehnder's servers.
 
-Three things about it are worth understanding before you start, because each one explains a problem you may hit later.
+Two things are worth sorting before you start:
 
-**It is local.** Home Assistant connects straight to the LAN C over your own network, on TCP port 56747. Nothing goes via Zehnder's servers, and the integration keeps working with the internet unplugged. The trade-off is that the protocol it speaks is Zehnder's own and undocumented — everything Home Assistant knows about it was worked out by the community.
+- **Give it a fixed address.** Home Assistant is told the LAN C's IP address once and never looks it up again. Find it in your router's list of connected devices, then set a **DHCP reservation** so it can't change later.
+- **Keep its client list short.** Only a handful of things can be registered to it at once — phone app, tablet, Home Assistant. If Home Assistant drops out whenever you open the Zehnder app, remove registrations you no longer use.
 
-**It needs a fixed address.** Home Assistant is told the LAN C's IP address as plain text and never looks it up again. Find the address in your router's list of connected devices, or in the Zehnder app under the connection settings, then set a **DHCP reservation** for it in your router. Skip that and the guide works perfectly until the day your router hands out a different address and every sensor goes unavailable at once.
-
-**It counts its clients.** Each thing that talks to the LAN C — your phone's Zehnder app, a tablet, Home Assistant — registers itself and takes up one of a small number of slots. Fill them all and something gets pushed off, which is why opening the Zehnder app can knock Home Assistant offline. If that happens, remove registrations you no longer use from the app.
-
-One LAN C serves one ventilation unit. Zehnder has since replaced it with the **ComfoConnect Pro**, which is a different device speaking a different protocol — see *[section 7](#7-comfoconnect-pro--not-yet-validated)* if that is what you have.
+Zehnder now sells the **ComfoConnect Pro** in its place. Different box, different setup — see *[section 7](#7-comfoconnect-pro--the-newer-alternative)*.
 
 ---
 
@@ -291,7 +288,7 @@ Add `sensor.comfoairq_preheater_energy_total` as a second device if you want the
 
 ---
 
-## 7. ComfoConnect Pro — not yet validated
+## 7. ComfoConnect Pro — the newer alternative
 
 **Nothing in this section has been tested.** Everything above was written against a LAN C. The ComfoConnect Pro is the newer Zehnder device that does the same job, and whether Home Assistant's `comfoconnect` integration talks to it is an open question — not a known yes, not a known no.
 
