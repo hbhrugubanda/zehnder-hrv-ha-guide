@@ -258,57 +258,24 @@ Add `sensor.comfoairq_preheater_energy_total` as a second device if you want the
 
 ## 7. ComfoConnect Pro — the newer alternative
 
-> **Nothing in this section has been tested.** Everything before it was read off a live LAN C. This section was assembled from Zehnder's material and community reports, and needs someone with a Pro in hand to confirm or correct it.
+> **Untested.** Everything before this section was read off a live LAN C. This one was assembled from Zehnder's material and community reports, and needs someone with a Pro to confirm it.
 
-### What is different
+The **ComfoConnect Pro** is what Zehnder sells in place of the LAN C. Same job, but it speaks a different language to the network, so **the integration in section 2 does not cover it**. If you have a Pro, expect to take one of these routes instead:
 
-The **ComfoConnect Pro** is Zehnder's replacement for the LAN C. It does the same job — sits on the unit's ComfoNet bus, puts it on your network — but it is not a like-for-like swap, because it speaks a different language.
+- **A HACS custom component** — [hstrohmaier/ha_comfoconnectpro](https://github.com/hstrohmaier/ha_comfoconnectpro). The closest thing to a ready-made answer. Installed as a custom repository, and the Pro needs Modbus switched on before it will connect.
+- **Home Assistant's built-in Modbus integration** — more setting up, but nothing third-party between you and the unit.
+- **An ESP32 on the unit's own bus, running ESPHome** — skips the Zehnder box altogether. More hardware work, and more of the unit exposed than either box gives you.
 
-| | LAN C | Pro |
-|---|---|---|
-| Protocol | Zehnder's own, undocumented, TCP port 56747 | **Modbus TCP**, an open industrial standard, TCP port 502 |
-| Also offers | — | KNX, on the multigateway versions |
-| Built-in Home Assistant integration | Yes — *section 2* | **No** |
-| Still sold | Superseded | Current |
-
-That protocol change is the whole story. The integration in section 2 was written to speak the LAN C's proprietary protocol on port 56747, and there is no confirmed report of it working against a Pro. **If you have a Pro, assume section 2 does not apply to you** and take one of the routes below instead.
-
-The upside is that Modbus is documented and open, which the LAN C's protocol never was. Anything the Pro exposes is reachable in principle, rather than limited to what the community managed to reverse-engineer.
-
-### Route 1 — the HACS custom component
-
-**<https://github.com/hstrohmaier/ha_comfoconnectpro>** — "ComfoConnectPro", a custom component that talks Modbus TCP to the Pro. Written against a ComfoAir Q350. It creates a climate entity with preset modes, plus sensors for the unit's state.
-
-Install it the same way as any custom repository: HACS → three-dot menu → *Custom repositories* → paste the URL, type *Integration* → install → restart → add it under *Settings → Devices & Services*.
-
-Before it will connect, **Modbus TCP has to be switched on in the Pro itself**. The component's documented defaults are slave ID `1` and TCP port `502`.
-
-This is the shortest path. The cost is a dependency on one person's project, and a smaller user base than the LAN C integration has.
-
-### Route 2 — Home Assistant's own Modbus integration
-
-Home Assistant ships a general-purpose **Modbus** integration. Because the Pro speaks standard Modbus TCP, you can point that at it directly and define the registers you care about yourself, with no custom code involved.
-
-More work up front — you need Zehnder's Modbus register list, and you write out each sensor by hand in `configuration.yaml` — but nothing sits between you and the device, and you are not waiting on anyone else to maintain it.
-
-### Route 3 — bypass both boxes
-
-Some people skip the Zehnder network box altogether and put an **ESP32 on the ComfoNet bus directly**, running ESPHome. Roughly £20 of hardware, and it exposes considerably more of the unit than either Zehnder box does. It is a build-it-yourself route with wiring involved, and it is mentioned here for completeness rather than recommended — but if you don't own either box yet, it is worth knowing the option exists.
+Everything else in this guide — what the sensors mean, the automation ideas, the dashboard advice — still applies once you have a connection. Only section 2 changes.
 
 ### What still needs confirming
 
-For whoever validates this section — replace it with findings as they come in.
+For whoever validates this, to be replaced with findings:
 
-| # | Test | A useful answer |
-|---|---|---|
-| 1 | Does the built-in `comfoconnect` integration connect at all? | The exact error from **Settings → System → Logs** after pointing it at a Pro. Expected to fail, but nobody has written it down |
-| 2 | How is Modbus TCP enabled on the Pro? | The menu path on the device or in the Zehnder app, and whether the defaults really are slave ID 1 / port 502 |
-| 3 | Is the Pro local-only, like the LAN C? | Whether it answers on the network with no internet access |
-| 4 | Which of the twenty-one LAN C values have Modbus equivalents? | A mapping, or a list of what's missing. The resource set may well differ |
-| 5 | Does control work both ways? | Whether fan speed and a return to automatic can both be set over Modbus |
-| 6 | Does the Pro also keep a limited client list? | Whether opening the Zehnder app disturbs Home Assistant, as it can on a LAN C |
-| 7 | Does the Pro expose anything the LAN C doesn't? | Bypass control and away mode are the two worth checking — the biggest gaps on the LAN C |
-| 8 | Where is Zehnder's Modbus register documentation? | A link, for anyone taking route 2 |
+- Does the built-in integration from section 2 fail against a Pro, and with what error?
+- How is Modbus switched on, and is the Pro local-only like the LAN C?
+- Which of the twenty-one LAN C values have equivalents on the Pro?
+- Does the Pro expose bypass control or away mode? Those are the biggest gaps on the LAN C.
 
 ---
 
