@@ -120,21 +120,21 @@ One naming quirk to know first: Zehnder's manuals call the air pulled out of you
 
 ### Everything else
 
-| Entity | What it tells you | Unit | Live |
-|---|---|---|---|
-| `sensor.comfoairq_supply_airflow` | Fresh air delivered | m³/h | 235 |
-| `sensor.comfoairq_exhaust_airflow` | Stale air removed | m³/h | 236 |
-| `sensor.comfoairq_supply_fan_speed` | Supply fan revolutions | rpm | 1900 |
-| `sensor.comfoairq_exhaust_fan_speed` | Extract fan revolutions | rpm | 1811 |
-| `sensor.comfoairq_supply_fan_duty` | How hard the supply fan works | % | 52 |
-| `sensor.comfoairq_exhaust_fan_duty` | How hard the extract fan works | % | 50 |
-| `sensor.comfoairq_bypass_state` | How far the summer bypass is open (0 closed, 100 open) | % | 0 |
-| `sensor.comfoairq_days_to_replace_filter` | Days until filters are due | d | 132 |
-| `sensor.comfoairq_current_rmot` | Running mean outdoor temperature — a rolling average the unit uses to decide the season has changed | °C | 13.5 |
-| `sensor.comfoairq_power_usage` | Current electricity draw | W | 43 |
-| `sensor.comfoairq_energy_total` | Lifetime electricity used | kWh | 564 |
-| `sensor.comfoairq_preheater_power_usage` | Frost preheater draw, zero unless genuinely cold | W | 0 |
-| `sensor.comfoairq_preheater_energy_total` | Lifetime preheater electricity | kWh | 0 |
+| Entity | What it tells you | Unit |
+|---|---|---|
+| `sensor.comfoairq_supply_airflow` | Fresh air delivered | m³/h |
+| `sensor.comfoairq_exhaust_airflow` | Stale air removed | m³/h |
+| `sensor.comfoairq_supply_fan_speed` | Supply fan revolutions | rpm |
+| `sensor.comfoairq_exhaust_fan_speed` | Extract fan revolutions | rpm |
+| `sensor.comfoairq_supply_fan_duty` | How hard the supply fan works | % |
+| `sensor.comfoairq_exhaust_fan_duty` | How hard the extract fan works | % |
+| `sensor.comfoairq_bypass_state` | How far the summer bypass is open (0 closed, 100 open) | % |
+| `sensor.comfoairq_days_to_replace_filter` | Days until filters are due | d |
+| `sensor.comfoairq_current_rmot` | Running mean outdoor temperature — a rolling average the unit uses to decide the season has changed | °C |
+| `sensor.comfoairq_power_usage` | Current electricity draw | W |
+| `sensor.comfoairq_energy_total` | Lifetime electricity used | kWh |
+| `sensor.comfoairq_preheater_power_usage` | Frost preheater draw, zero unless genuinely cold | W |
+| `sensor.comfoairq_preheater_energy_total` | Lifetime preheater electricity | kWh |
 
 ### What it can't do
 
