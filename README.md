@@ -14,7 +14,9 @@ You already have all of this working:
 - A **[ComfoConnect LAN C](#1a-the-comfoconnect-lan-c)** or **[ComfoConnect Pro](#1b-the-comfoconnect-pro)** — the small Zehnder device that puts the unit on your network — plugged in and working in the Zehnder app.
 - A running **Home Assistant**, and you know that device's IP address.
 
-If the Zehnder app can see your unit, you have everything you need. This guide covers only the Home Assistant side, and it is written for the LAN C — section 1b covers what changes on a Pro.
+If the Zehnder app can see your unit, you have everything you need. This guide covers only the Home Assistant side.
+
+**Two routes run through this guide.** Read **1a** and **2a** if you have a LAN C, or **1b** and **2b** if you have a Pro; everything from section 3 onwards applies to both. The LAN C route is the tested one.
 
 Everything below was read off a live LAN C install rather than copied from documentation. Where something has *not* been verified, it says so.
 
@@ -35,26 +37,19 @@ Zehnder now sells the **ComfoConnect Pro** in its place. Different box, differen
 
 ## 1b. The ComfoConnect Pro
 
-The **ComfoConnect Pro** is what Zehnder sells now instead of the LAN C. Same idea — it joins the unit to your network — but it is a different device, and **section 2 does not apply to it**. Home Assistant's built-in integration only speaks the LAN C's language.
+The **ComfoConnect Pro** is what Zehnder sells now instead of the LAN C. Same idea — it joins the unit to your network — but it is a different device, and **section 2a does not apply to it**. Home Assistant's built-in integration only speaks the LAN C's language.
 
 **It has to be set up first, and it doesn't arrive ready.** Press the **AP** button, join the temporary **ComfoConnectPro** Wi-Fi network it creates (password on the device label), and open **http://comfoconnectpro.local** in a browser. From there, put it on your home network — ethernet or Wi-Fi — and give it a fixed address in your router.
 
 Then, on that same web page, go to **Protocols & Services** and switch the protocol to **Modbus TCP**. Leave the defaults alone: slave ID 1, port 502. Nothing in Home Assistant can see the Pro until that is on.
 
-**Modbus is how Home Assistant talks to it.** Two routes, both fine:
-
-- **[hstrohmaier/ha_comfoconnectpro](https://github.com/hstrohmaier/ha_comfoconnectpro)**, installed through HACS as a custom repository. Asks for the address, slave ID and port, and does the rest. Written against a ComfoAir Q350.
-- **Home Assistant's own Modbus integration**, which is built in. More setting up — you list the values you want yourself — but nothing third-party involved.
-
-The Pro can do things the LAN C can't, including away mode, a timed boost and a temperature target. It doesn't report fan speeds or electricity use, so the Energy dashboard trick in section 5 has no equivalent.
+Once that is done, carry on to **section 2b**.
 
 > **Researched, not tested.** The rest of this guide was written against a live LAN C. This section comes from Zehnder's own [ComfoConnect PRO installer manual](https://zehnder.lv/wp-content/uploads/2024/12/ComfoConnect-PRO-Installer-manual.pdf), which documents the setup and the full Modbus interface — so the details are Zehnder's, but nobody has yet proved the round trip to Home Assistant end to end. Corrections welcome.
 
 ---
 
-## 2. Connect it to Home Assistant
-
-*This section is the LAN C route. On a Pro, follow section 1b instead.*
+## 2a. Connect a LAN C to Home Assistant
 
 **You do not need HACS — the community store other guides send you to — and there is nothing for you to install.** An integration called **[Zehnder ComfoAir Q](https://www.home-assistant.io/integrations/comfoconnect/)** already ships with Home Assistant — it is part of Home Assistant itself, which is why it has a page on the official documentation site rather than a repository you add. What throws people is that it is also one of the few with **no setup screen** — you won't find it under *Settings → Devices & Services*, because you add it by editing a text file and restarting instead. That combination is unusual, but it's expected, not a mistake.
 
@@ -106,6 +101,19 @@ Three notes:
 - If `sensor:` already exists at the far left of your file, don't add a second one. Move just the `- platform: comfoconnect` part underneath the existing `sensor:` line.
 - `name: ComfoAirQ` decides what every entity is called. Leave it alone and every example below works as written.
 - Any later change to this block needs another **restart**, not a YAML reload.
+
+---
+
+## 2b. Connect a Pro to Home Assistant
+
+A Pro speaks **Modbus**, so the integration in 2a is no use here. Two routes, both fine:
+
+- **[hstrohmaier/ha_comfoconnectpro](https://github.com/hstrohmaier/ha_comfoconnectpro)**, added to HACS as a custom repository. It asks for the address, slave ID and port from section 1b, and does the rest. Written against a ComfoAir Q350.
+- **Home Assistant's own Modbus integration**, which is built in and needs nothing downloaded. More setting up — you list the values you want yourself, in `configuration.yaml` — but nothing third-party involved.
+
+Either way you end up with the unit as entities in Home Assistant, and sections 3 to 6 read across. The names will differ from the `comfoairq` ones used in the examples, so substitute your own.
+
+Worth knowing before you choose: the Pro can do things the LAN C can't, including away mode, a timed boost and a temperature target. It doesn't report fan speeds or electricity use, so the Energy dashboard in section 5 has no equivalent.
 
 ---
 
@@ -269,7 +277,7 @@ Add `sensor.comfoairq_preheater_energy_total` as a second device if you want the
 |---|---|---|
 | Home Assistant won't start after the edit | YAML indentation — a tab, or wrong number of spaces | Restore the backup, re-copy the block rather than retyping it |
 | No `comfoairq` entities at all | Wrong IP, or the Zehnder device is on a different network segment | Confirm the address, check the LAN C's link light |
-| Config check fails naming a resource | Mistyped resource key | Copy the block in section 2 again rather than retyping it — several keys aren't what you'd guess |
+| Config check fails naming a resource | Mistyped resource key | Copy the block in section 2a again rather than retyping it — several keys aren't what you'd guess |
 | Fan appears but sensors don't | The `sensor:` block was missed, or a second `sensor:` key overwrote the first | Confirm `sensor:` appears exactly once at the far left of the file |
 | Worked, then stopped weeks later | The Zehnder device's IP changed | Set a DHCP reservation for the LAN C in your router |
 | Drops out when the Zehnder app is opened | The Zehnder device allows a limited number of registered clients | Remove unused device registrations in the Zehnder app, restart Home Assistant *(commonly reported, not tested here)* |
