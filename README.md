@@ -11,16 +11,16 @@ Repository: <https://github.com/hbhrugubanda/zehnder-hrv-ha-guide>
 You already have all of this working:
 
 - A **Zehnder ComfoAir Q** (Q350 / Q450 / Q600), installed and running.
-- A **[ComfoConnect LAN C](#1-the-comfoconnect-lan-c)** — the small Zehnder device that puts the unit on your network — plugged in and working in the Zehnder app.
-- A running **Home Assistant**, and you know the LAN C's IP address.
+- A **[ComfoConnect LAN C](#1a-the-comfoconnect-lan-c)** or **[ComfoConnect Pro](#1b-the-comfoconnect-pro)** — the small Zehnder device that puts the unit on your network — plugged in and working in the Zehnder app.
+- A running **Home Assistant**, and you know that device's IP address.
 
-If the Zehnder app can see your unit, you have everything you need. This guide covers only the Home Assistant side.
+If the Zehnder app can see your unit, you have everything you need. This guide covers only the Home Assistant side, and it is written for the LAN C — section 1b covers what changes on a Pro.
 
 Everything below was read off a live LAN C install rather than copied from documentation. Where something has *not* been verified, it says so.
 
 ---
 
-## 1. The ComfoConnect LAN C
+## 1a. The ComfoConnect LAN C
 
 The ComfoAir Q has no network connection of its own. The **ComfoConnect LAN C** is the small separate box that gives it one — it wires into the unit at one end and into your network at the other. Home Assistant talks to that box, not to the unit itself, and it all happens on your own network with nothing going via Zehnder's servers.
 
@@ -29,11 +29,32 @@ Two things are worth sorting before you start:
 - **Give it a fixed address.** Home Assistant is told the LAN C's IP address once and never looks it up again. Find it in your router's list of connected devices, then set a **DHCP reservation** so it can't change later.
 - **Keep its client list short.** Only a handful of things can be registered to it at once — phone app, tablet, Home Assistant. If Home Assistant drops out whenever you open the Zehnder app, remove registrations you no longer use.
 
-Zehnder now sells the **ComfoConnect Pro** in its place. Different box, different setup — see *[section 7](#7-comfoconnect-pro--the-newer-alternative)*.
+Zehnder now sells the **ComfoConnect Pro** in its place. Different box, different setup — see *[section 1b](#1b-the-comfoconnect-pro)*.
+
+---
+
+## 1b. The ComfoConnect Pro
+
+The **ComfoConnect Pro** is what Zehnder sells now instead of the LAN C. Same idea — it joins the unit to your network — but it is a different device, and **section 2 does not apply to it**. Home Assistant's built-in integration only speaks the LAN C's language.
+
+**It has to be set up first, and it doesn't arrive ready.** Press the **AP** button, join the temporary **ComfoConnectPro** Wi-Fi network it creates (password on the device label), and open **http://comfoconnectpro.local** in a browser. From there, put it on your home network — ethernet or Wi-Fi — and give it a fixed address in your router.
+
+Then, on that same web page, go to **Protocols & Services** and switch the protocol to **Modbus TCP**. Leave the defaults alone: slave ID 1, port 502. Nothing in Home Assistant can see the Pro until that is on.
+
+**Modbus is how Home Assistant talks to it.** Two routes, both fine:
+
+- **[hstrohmaier/ha_comfoconnectpro](https://github.com/hstrohmaier/ha_comfoconnectpro)**, installed through HACS as a custom repository. Asks for the address, slave ID and port, and does the rest. Written against a ComfoAir Q350.
+- **Home Assistant's own Modbus integration**, which is built in. More setting up — you list the values you want yourself — but nothing third-party involved.
+
+The Pro can do things the LAN C can't, including away mode, a timed boost and a temperature target. It doesn't report fan speeds or electricity use, so the Energy dashboard trick in section 5 has no equivalent.
+
+> **Researched, not tested.** The rest of this guide was written against a live LAN C. This section comes from Zehnder's own [ComfoConnect PRO installer manual](https://zehnder.lv/wp-content/uploads/2024/12/ComfoConnect-PRO-Installer-manual.pdf), which documents the setup and the full Modbus interface — so the details are Zehnder's, but nobody has yet proved the round trip to Home Assistant end to end. Corrections welcome.
 
 ---
 
 ## 2. Connect it to Home Assistant
+
+*This section is the LAN C route. On a Pro, follow section 1b instead.*
 
 **You do not need HACS — the community store other guides send you to — and there is nothing for you to install.** An integration called **[Zehnder ComfoAir Q](https://www.home-assistant.io/integrations/comfoconnect/)** already ships with Home Assistant — it is part of Home Assistant itself, which is why it has a page on the official documentation site rather than a repository you add. What throws people is that it is also one of the few with **no setup screen** — you won't find it under *Settings → Devices & Services*, because you add it by editing a text file and restarting instead. That combination is unusual, but it's expected, not a mistake.
 
@@ -256,27 +277,6 @@ Add `sensor.comfoairq_preheater_energy_total` as a second device if you want the
 
 ---
 
-## 7. ComfoConnect Pro — the newer alternative
-
-**Nothing in this section has been tested.** Everything above was written against a LAN C. The ComfoConnect Pro is the newer Zehnder device that does the same job, and whether Home Assistant's `comfoconnect` integration talks to it is an open question — not a known yes, not a known no.
-
-If you have a Pro, don't assume the config block above works unchanged. This is a checklist for whoever validates it, to be replaced with findings.
-
-| # | Test | A useful answer |
-|---|---|---|
-| 1 | Does the existing integration connect at all? | The exact error from **Settings → System → Logs** after pointing the config at the Pro |
-| 2 | Local connection, or cloud-only? | Whether the Zehnder device answers on the local network with no internet access |
-| 3 | Does pairing behave the same? | Whether a PIN is needed, and whether it registers in the Zehnder app |
-| 4 | Do all twenty-one resources populate? | A list of any that stay unavailable — the resource set may differ |
-| 5 | Does fan control work? | Whether `fan.set_percentage` and `fan.set_preset_mode` actually move the unit |
-| 6 | Does it survive a reboot of both devices? | Whether it reconnects alone or needs a Home Assistant restart |
-| 7 | Can the app and Home Assistant coexist? | Whether opening the Zehnder app knocks Home Assistant offline |
-| 8 | Anything the Pro exposes that the LAN C doesn't? | Bypass control and away mode are the two worth checking — the biggest gaps on the LAN C |
-
-If the answer to 1 is no, the follow-up is whether a community integration covers the Pro — in which case this becomes a separate route rather than a variation on the config above.
-
----
-
 ## A printable copy
 
 If you'd rather have this as a PDF to keep or pass on, clone the repository and run:
@@ -289,6 +289,6 @@ The finished file lands in `build/`.
 
 ---
 
-*Written against a live ComfoConnect LAN C paired to a ComfoAir Q. Entity IDs, resource keys, units and sample values were read from that installation rather than transcribed from documentation. The ComfoConnect Pro section is explicitly untested and marked as such.*
+*Written against a live ComfoConnect LAN C paired to a ComfoAir Q. Entity IDs, resource keys, units and sample values were read from that installation rather than transcribed from documentation. The ComfoConnect Pro section is drawn from Zehnder's published installer manual rather than from a tested install, and is marked as such.*
 
 *Not affiliated with or endorsed by Zehnder. Check your unit's warranty terms before changing how it is controlled.*
