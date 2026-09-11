@@ -20,6 +20,8 @@ If the Zehnder app can see your unit, you have everything you need. This guide c
 
 Everything below was read off a live LAN C install rather than copied from documentation. Where something has *not* been verified, it says so.
 
+Written against **Home Assistant 2026.9.2**, September 2026. Menu names shift between releases - *Tools* was called *Developer tools* and sat in the sidebar before 2026.2, and *Apps* were *Add-ons* before 2026.6 - so if a path here doesn't match your screen, look for the nearest equivalent under *Settings*.
+
 ---
 
 ## 1a. The ComfoConnect LAN C
