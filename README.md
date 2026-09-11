@@ -35,9 +35,7 @@ Zehnder now sells the **ComfoConnect Pro** in its place. Different box, differen
 
 ## 2. Connect it to Home Assistant
 
-**For this guide you do not need HACS, and there is nothing to download.** A Zehnder integration called **ComfoConnect** already ships with Home Assistant. What throws people is that it is also one of the few with **no setup screen** — you won't find it under *Settings → Devices & Services*, because you add it by editing a text file and restarting instead. That combination is unusual, but it's expected, not a mistake.
-
-(There is also an optional HACS version with a proper setup screen and extra controls. It is worth knowing about, but start here — everything in this guide is written against the built-in one. See *[The HACS alternative](#the-hacs-alternative)* at the end of this section.)
+**You do not need HACS, and there is nothing to download.** A Zehnder integration called **ComfoConnect** already ships with Home Assistant. What throws people is that it is also one of the few with **no setup screen** — you won't find it under *Settings → Devices & Services*, because you add it by editing a text file and restarting instead. That combination is unusual, but it's expected, not a mistake.
 
 Open `configuration.yaml` (the **File editor** app under *Settings → Apps* is the easiest route) and add this to the bottom. Change the IP to your Zehnder device's.
 
@@ -100,25 +98,6 @@ Six resource keys don't match the entity name you end up with. The block above a
 | `preheater_energy_total` | `preheater_power_total` | `sensor.comfoairq_preheater_energy_total` |
 
 Also worth knowing: Zehnder's manuals call the air leaving your rooms **extract** air. Home Assistant calls it **inside**, and uses **exhaust** for air leaving the building.
-
-### The HACS alternative
-
-The built-in integration works, but Home Assistant now labels it a **legacy integration** — it still ships, it just isn't being developed. Its author has written a newer replacement that lives outside Home Assistant, in **HACS**, and is intended to take over from it eventually:
-
-**<https://github.com/michaelarnauts/home-assistant-comfoconnect>** — "Zehnder ComfoAirQ", built on the `aiocomfoconnect` library. Same author as the built-in one, same ComfoConnect LAN C hardware.
-
-What it adds:
-
-- A real **setup screen**. No `configuration.yaml`, no restart to change settings.
-- More than one bridge, if you have more than one unit.
-- Controls the built-in version doesn't expose — bypass mode, balance mode, temperature profile, clearing alarms.
-- Fan speed changes that stick, rather than reverting.
-
-The trade-offs: it is a **custom repository**, so you add it to HACS by URL rather than finding it in the list; its author still describes it as being for testing; and it is **not a drop-in swap** — entity names differ, so the examples in this guide would need adjusting.
-
-To install it: HACS → three-dot menu → *Custom repositories* → paste the URL above, type *Integration* → install **Zehnder ComfoAirQ** → restart → *Settings → Devices & Services → Add integration*.
-
-**Run one or the other, not both.** Remove the `comfoconnect:` and `- platform: comfoconnect` blocks from `configuration.yaml` before you switch. Both versions log in to the same Zehnder device, which only tolerates so many sessions.
 
 ---
 
