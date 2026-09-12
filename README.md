@@ -115,7 +115,7 @@ A Pro speaks **Modbus**, so the integration in 2a is no use here. Two routes, bo
 
 Either way you end up with the unit as entities in Home Assistant, and the rest of the guide is worth reading for the ideas. Take it as the shape of the thing rather than a literal list: your entity names won't be the `comfoairq` ones used in the examples, and the Pro reports a different set of values.
 
-The two boxes don't offer the same things. The Pro **can** do what the LAN C can't: away mode, a timed boost, a temperature target, and clearing errors. It also reports CO2 per zone, where sensors are fitted. What it **doesn't** report is fan speed, fan duty, power or energy - so the fan diagnostics in section 3 and the Energy dashboard in section 5 have no Pro equivalent.
+The two boxes don't offer the same things. The Pro **can** do what the LAN C can't: away mode, a timed boost, a temperature target, and clearing errors. It also reports CO2 per zone, where sensors are fitted. What it **doesn't** report is fan speed, fan duty, power or energy - so the fan and electricity readings in section 3 have no Pro equivalent.
 
 ---
 
@@ -254,7 +254,7 @@ Things the sensors support that are worth building once the basics work:
 - **Frost warning** - notify when `preheater_power_usage` goes above zero for a sustained period. It means the unit is spending real electricity fighting the cold.
 - **Bypass watch** - you can't control the bypass, but you can chart `bypass_state` against indoor and outdoor temperature to see whether the unit's own logic is behaving.
 - **Efficiency tracking** - a template sensor comparing supply, outside and inside temperatures gives you a live heat recovery percentage to trend over months.
-- **Filter life on the Energy dashboard** - pair filter days with `power_usage`; a clogging filter shows up as rising fan duty for the same airflow.
+- **Watch the filters age** - chart filter days against `supply_fan_duty`; a clogging filter shows up as rising fan duty for the same airflow.
 
 ---
 
@@ -266,12 +266,6 @@ Every entity is on a dashboard already - Home Assistant builds one automatically
 - **Temperatures side by side.** A glance card with outside, supply, inside and exhaust in that order reads as the journey air takes through the unit, left to right.
 - **A history graph is the one to keep.** Put supply, outside and inside temperature on one 24-hour graph. The gap between the outside line and the supply line *is* your heat recovery, drawn over time - the single most satisfying thing this integration gives you.
 - **Everything else on an entities card.** Airflow, humidity, bypass state, power draw, filter days. Useful to have, not worth a card each.
-
-### Energy dashboard
-
-`sensor.comfoairq_energy_total` is a proper lifetime energy meter, so the Energy dashboard takes it directly: **Settings → Dashboards → Energy → Individual devices → Add device**.
-
-Add `sensor.comfoairq_preheater_energy_total` as a second device if you want the frost preheater separately. In a cold snap it can dwarf the fans.
 
 ---
 
