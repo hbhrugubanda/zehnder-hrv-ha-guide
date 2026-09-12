@@ -273,32 +273,6 @@ Add `sensor.comfoairq_preheater_energy_total` as a second device if you want the
 
 ---
 
-## 6. Troubleshooting
-
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| Home Assistant won't start after the edit | YAML indentation - a tab, or wrong number of spaces | Restore the backup, re-copy the block rather than retyping it |
-| No `comfoairq` entities at all | Wrong IP, or the Zehnder device is on a different network segment | Confirm the address, check the LAN C's link light |
-| Config check fails naming a resource | Mistyped resource key | Copy the block in section 2a again rather than retyping it - several keys aren't what you'd guess |
-| Fan appears but sensors don't | The `sensor:` block was missed, or a second `sensor:` key overwrote the first | Confirm `sensor:` appears exactly once at the far left of the file |
-| Worked, then stopped weeks later | The Zehnder device's IP changed | Set a DHCP reservation for the LAN C in your router |
-| Drops out when the Zehnder app is opened | The Zehnder device allows a limited number of registered clients | Remove unused device registrations in the Zehnder app, restart Home Assistant *(commonly reported, not tested here)* |
-| Fan stuck at one speed | An automation set a percentage and never handed control back | Call `fan.set_preset_mode` with `auto` from **Settings → Tools → Actions**, then fix the automation |
-
----
-
-## A printable copy
-
-If you'd rather have this as a PDF to keep or pass on, clone the repository and run:
-
-```
-./build-pdf.sh
-```
-
-The finished file lands in `build/`.
-
----
-
 *Written against a live ComfoConnect LAN C paired to a ComfoAir Q. Entity IDs, resource keys, units and sample values were read from that installation rather than transcribed from documentation. The ComfoConnect Pro section is drawn from Zehnder's published installer manual rather than from a tested install, and is marked as such.*
 
 *Not affiliated with or endorsed by Zehnder. Check your unit's warranty terms before changing how it is controlled.*
