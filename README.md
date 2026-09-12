@@ -16,7 +16,7 @@ You already have all of this working:
 
 If the Zehnder app can see your unit, you have everything you need. This guide covers only the Home Assistant side.
 
-**Two routes run through this guide.** Read **1a** and **2a** if you have a LAN C, or **1b** and **2b** if you have a Pro; everything from section 3 onwards applies to both. The LAN C route is the tested one.
+**Two routes run through this guide.** Read **1a** and **2a** if you have a LAN C, or **1b** and **2b** if you have a Pro. Sections 3 to 5 are written for the LAN C - the ideas hold either way, but a Pro reports a different set of values under different names. The LAN C route is the tested one.
 
 Everything below was read off a live LAN C install rather than copied from documentation. Where something has *not* been verified, it says so.
 
@@ -113,13 +113,15 @@ A Pro speaks **Modbus**, so the integration in 2a is no use here. Two routes, bo
 - **[hstrohmaier/ha_comfoconnectpro](https://github.com/hstrohmaier/ha_comfoconnectpro)**, added to HACS as a custom repository. It asks for the address, slave ID and port from section 1b, and does the rest. Written against a ComfoAir Q350.
 - **Home Assistant's own Modbus integration**, which is built in and needs nothing downloaded. More setting up - you list the values you want yourself, in `configuration.yaml` - but nothing third-party involved.
 
-Either way you end up with the unit as entities in Home Assistant, and sections 3 to 6 read across. The names will differ from the `comfoairq` ones used in the examples, so substitute your own.
+Either way you end up with the unit as entities in Home Assistant, and the rest of the guide is worth reading for the ideas. Take it as the shape of the thing rather than a literal list: your entity names won't be the `comfoairq` ones used in the examples, and the Pro reports a different set of values.
 
-Worth knowing before you choose: the Pro can do things the LAN C can't, including away mode, a timed boost and a temperature target. It doesn't report fan speeds or electricity use, so the Energy dashboard in section 5 has no equivalent.
+The two boxes don't offer the same things. The Pro **can** do what the LAN C can't: away mode, a timed boost, a temperature target, and clearing errors. It also reports CO2 per zone, where sensors are fitted. What it **doesn't** report is fan speed, fan duty, power or energy - so the fan diagnostics in section 3 and the Energy dashboard in section 5 have no Pro equivalent.
 
 ---
 
 ## 3. What you get
+
+*Written for the LAN C. A Pro exposes a different set, under different names - see section 1b.*
 
 One control and twenty-one readings.
 
