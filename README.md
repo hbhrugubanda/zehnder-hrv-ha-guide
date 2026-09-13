@@ -16,9 +16,9 @@ You already have all of this working:
 
 If the Zehnder app can see your unit, you have everything you need. This guide covers only the Home Assistant side.
 
-**Two routes run through this guide.** Read **1a** and **2a** if you have a LAN C, or **1b** and **2b** if you have a Pro. Sections 3 to 5 are written for the LAN C - the ideas hold either way, but a Pro reports a different set of values under different names. The LAN C route is the tested one.
+**Which sections you need depends on your box.** Read **1a** and **2a** for a LAN C, **1b** and **2b** for a Pro. Sections 3 to 5 describe the LAN C; the ideas carry over to a Pro, though it reports a different set of values under different names. The LAN C route is the tested one.
 
-Everything below was read off a live LAN C install rather than copied from documentation. Where something has *not* been verified, it says so.
+Everything below was read off a live LAN C install. Where something has *not* been verified, it says so.
 
 Written against **Home Assistant 2026.9.2**, September 2026. Menu names shift between releases - *Tools* was called *Developer tools* and sat in the sidebar before 2026.2, and *Apps* were *Add-ons* before 2026.6 - so if a path here doesn't match your screen, look for the nearest equivalent under *Settings*.
 
@@ -28,7 +28,7 @@ Written against **Home Assistant 2026.9.2**, September 2026. Menu names shift be
 
 The ComfoAir Q has no network connection of its own. The **ComfoConnect LAN C** is the small separate box that gives it one - it wires into the unit at one end and into your network at the other. Home Assistant talks to that box, not to the unit itself, and it all happens on your own network with nothing going via Zehnder's servers.
 
-Two things are worth sorting before you start:
+Sort these two before you start:
 
 - **Give it a fixed address.** Home Assistant is told the LAN C's IP address once and never looks it up again. Find it in your router's list of connected devices, then set a **DHCP reservation** so it can't change later.
 - **Keep its client list short.** Only a handful of things can be registered to it at once - phone app, tablet, Home Assistant. If Home Assistant drops out whenever you open the Zehnder app, remove registrations you no longer use.
@@ -39,9 +39,9 @@ Zehnder now sells the **ComfoConnect Pro** in its place. Different box, differen
 
 ## 1b. The ComfoConnect Pro
 
-The **ComfoConnect Pro** is what Zehnder sells now instead of the LAN C. Same idea - it joins the unit to your network - but it is a different device, and **section 2a does not apply to it**. Home Assistant's built-in integration only speaks the LAN C's language.
+The **ComfoConnect Pro** is Zehnder's current box, the replacement for the LAN C. It does the same job of joining the unit to your network, but it is a different device, and **section 2a does not apply to it**. Home Assistant's built-in integration only speaks the LAN C's language.
 
-**It has to be set up first, and it doesn't arrive ready.** Press the **AP** button, join the temporary **ComfoConnectPro** Wi-Fi network it creates (password on the device label), and open **http://comfoconnectpro.local** in a browser. From there, put it on your home network - ethernet or Wi-Fi - and give it a fixed address in your router.
+It has to be set up first, and it does not arrive ready. Press the **AP** button, join the temporary **ComfoConnectPro** Wi-Fi network it creates (password on the device label), and open **http://comfoconnectpro.local** in a browser. From there, put it on your home network - ethernet or Wi-Fi - and give it a fixed address in your router.
 
 Then, on that same web page, go to **Protocols & Services** and switch the protocol to **Modbus TCP**. Leave the defaults alone: slave ID 1, port 502. Nothing in Home Assistant can see the Pro until that is on.
 
@@ -53,7 +53,7 @@ Once that is done, carry on to **section 2b**.
 
 ## 2a. Connect a LAN C to Home Assistant
 
-**You do not need HACS - the community store other guides send you to - and there is nothing for you to install.** An integration called **[Zehnder ComfoAir Q](https://www.home-assistant.io/integrations/comfoconnect/)** already ships with Home Assistant - it is part of Home Assistant itself, which is why it has a page on the official documentation site rather than a repository you add. What throws people is that it is also one of the few with **no setup screen** - you won't find it under *Settings → Devices & Services*, because you add it by editing a text file and restarting instead. That combination is unusual, but it's expected, not a mistake.
+**You do not need HACS**, the community store other guides send you to, and there is nothing for you to install. An integration called **[Zehnder ComfoAir Q](https://www.home-assistant.io/integrations/comfoconnect/)** already ships with Home Assistant, as part of Home Assistant itself. That is why it has a page on the official documentation site, with no repository to add. What throws people is that it is also one of the few with **no setup screen**. You won't find it under *Settings → Devices & Services*; you add it by editing a text file and restarting. That combination is unusual, and it is expected.
 
 **Take a backup first** - *Settings → System → Backups*. You are about to edit the file Home Assistant reads on startup, and a stray space in it can stop Home Assistant starting.
 
@@ -98,7 +98,7 @@ Then:
 
 Those are your **entities** - Home Assistant's word for one controllable thing or one reading. Each has an **entity ID** like `sensor.comfoairq_inside_temperature`, and that ID is what you point automations and dashboards at for the rest of this guide.
 
-Three notes:
+Three things to watch:
 
 - If `sensor:` already exists at the far left of your file, don't add a second one. Move just the `- platform: comfoconnect` part underneath the existing `sensor:` line.
 - `name: ComfoAirQ` decides what every entity is called. Leave it alone and every example below works as written.
@@ -108,12 +108,12 @@ Three notes:
 
 ## 2b. Connect a Pro to Home Assistant
 
-A Pro speaks **Modbus**, so the integration in 2a is no use here. Two routes, both fine:
+A Pro speaks **Modbus**, so the integration in 2a is no use here. Either of these works:
 
 - **[hstrohmaier/ha_comfoconnectpro](https://github.com/hstrohmaier/ha_comfoconnectpro)**, added to HACS as a custom repository. It asks for the address, slave ID and port from section 1b, and does the rest. Written against a ComfoAir Q350.
 - **Home Assistant's own Modbus integration**, which is built in and needs nothing downloaded. More setting up - you list the values you want yourself, in `configuration.yaml` - but nothing third-party involved.
 
-Either way you end up with the unit as entities in Home Assistant, and the rest of the guide is worth reading for the ideas. Take it as the shape of the thing rather than a literal list: your entity names won't be the `comfoairq` ones used in the examples, and the Pro reports a different set of values.
+Either way you end up with the unit as entities in Home Assistant, and the rest of the guide still gives you the ideas. Read it for the shape: your entity names will differ from the `comfoairq` ones in the examples, and the Pro reports a different set of values.
 
 The two boxes don't offer the same things. The Pro **can** do what the LAN C can't: away mode, a timed boost, a temperature target, and clearing errors. It also reports CO2 per zone, where sensors are fitted. What it **doesn't** report is fan speed, fan duty, power or energy - so the fan and electricity readings in section 3 have no Pro equivalent.
 
@@ -173,7 +173,7 @@ One naming quirk to know first: Zehnder's manuals call the air pulled out of you
 
 ### What it can't do
 
-The integration is read-mostly. Worth knowing before you plan anything on top of it.
+The integration is read-mostly. Plan around these limits:
 
 - **The bypass is read-only.** You can see how far it's open, not move it.
 - **No away or holiday switch.** Closest equivalent is setting the fan to 0%.
@@ -196,21 +196,21 @@ None of these are recipes to copy. Each is one trigger and one or two actions, b
 
 ### Boost when the air gets humid
 
-The most useful one by a distance, and it needs no extra hardware - it runs off the unit's own extract humidity sensor.
+Start with this one. It needs no extra hardware, since it runs off the unit's own extract humidity sensor.
 
 **When** `sensor.comfoairq_inside_humidity` stays above 70% for five minutes → **run** the fan at 100% → **wait** until it drops back below 63%, giving up after an hour → **set preset to `auto`**.
 
 **Picking your numbers.** That sensor measures the air being pulled out of your wet rooms, so it rises whenever anyone showers, cooks or dries laundry - one trigger covering the whole house. But it is a blend of every extract point, so it moves more slowly and less sharply than a sensor sitting in the bathroom itself.
 
-Set the thresholds against your own baseline rather than copying mine. Click the sensor in Home Assistant, look at a week of history, and note where it normally sits - on the reference unit that's around 59%. Trigger roughly 10 points above that, and release about 4 points above it. Hence 70% and 63%. If the boost never fires, lower the trigger; if it fires while nothing is happening, raise it.
+Set the thresholds from your own baseline. Click the sensor in Home Assistant, look at a week of history, and note where it normally sits - on the reference unit that's around 59%. Trigger roughly 10 points above that, and release about 4 points above it. Hence 70% and 63%. If the boost never fires, lower the trigger; if it fires while nothing is happening, raise it.
 
-Two other details worth keeping: the five minute delay on the trigger stops a brief blip causing a boost, and setting the automation's run mode to **Restart** means a second shower mid-boost restarts the timer rather than the automation refusing to run.
+Two details earn their place. The five minute delay on the trigger stops a brief blip causing a boost. Setting the automation's run mode to **Restart** lets a second shower mid-boost restart the timer, so the automation still runs.
 
-A humidity sensor in the bathroom itself is the upgrade here - it reacts within seconds rather than minutes. Use it in place of the extract sensor if you add one.
+A humidity sensor in the bathroom itself is the upgrade here, reacting within seconds. Use it in place of the extract sensor if you add one.
 
 ### Boost while the rangehood runs
 
-An idea rather than a recipe, and the most useful one if your hood recirculates. A recirculating hood filters grease and some odour, then blows the air straight back into the room - the smells never leave the house. Boosting the unit while the hood runs gives them somewhere to go. Whether that is worth automating depends on your kitchen.
+An idea to adapt, and it earns its keep if your hood recirculates. A recirculating hood filters grease and some odour, then blows the air straight back into the room - the smells never leave the house. Boosting the unit while the hood runs gives them somewhere to go. Whether that is worth automating depends on your kitchen.
 
 **When** the rangehood switches on → **run** the fan at 100% → **wait** until it switches off, giving up after two hours → **wait** a further 15 minutes → **set preset to `auto`**.
 
@@ -218,11 +218,11 @@ The run-on does most of the work - smells outlast the cooking. The two hour cuto
 
 **If your rangehood isn't smart**, and most aren't, trigger on a power-monitoring smart plug instead: boost when its power sensor goes above roughly 20 W and release below 10 W, adjusted to whatever the hood actually draws. The hood light works as a rougher proxy.
 
-Two things worth knowing before you rely on it. The unit raises supply and extract together, so you cannot boost incoming air alone from Home Assistant - a boost moves more air both ways. And if your hood is **ducted** rather than recirculating, it already extracts far more than the unit can, so the boost adds little; in a house with an open-flued appliance, a powerful ducted hood is a backdraft question for a heating engineer rather than something an automation addresses. Either way, never duct a rangehood into the MVHR - the grease has nowhere good to go.
+Two limits apply. The unit raises supply and extract together, so a boost moves more air both ways and you cannot lift incoming air alone. And a **ducted** hood already extracts far more than the unit can, so the boost adds little there; in a house with an open-flued appliance, a powerful ducted hood raises a backdraft question for a heating engineer. Either way, never duct a rangehood into the MVHR - the grease has nowhere good to go.
 
 ### Wind down when the house is empty
 
-Two small automations rather than one.
+This one takes two automations.
 
 **When** the number of people in `zone.home` drops below 1 for ten minutes → **run** the fan at 33%.
 
@@ -236,7 +236,7 @@ Pull cool night air through the house, but only when outside is genuinely cooler
 
 **At** 22:00, **if** `sensor.comfoairq_inside_temperature` is above 23 °C **and** `sensor.comfoairq_outside_temperature` is below the inside temperature → **run** the fan at 100% for three hours → **set preset to `auto`**.
 
-That second condition compares one sensor against another rather than against a fixed number - Home Assistant accepts an entity in place of a value. It is what stops the automation running on a warm night and making things worse.
+That second condition compares one sensor against another, since Home Assistant accepts an entity in place of a value. It is what stops the automation running on a warm night and making things worse.
 
 ### Filter reminder
 
@@ -260,15 +260,15 @@ Things the sensors support that are worth building once the basics work:
 
 ## 5. Putting it on a dashboard
 
-Every entity is on a dashboard already - Home Assistant builds one automatically - so this is about arranging them rather than getting them to appear. Build what suits you; a few pointers on what works well for a ventilation unit:
+Home Assistant builds a dashboard automatically, so every entity is already on one and the job is arranging them. Build what suits you. A few pointers for a ventilation unit:
 
 - **The fan tile.** A tile card on `fan.comfoairq` with the *fan speed* feature gives you the whole control surface: current speed, and four buttons to change it.
 - **Temperatures side by side.** A glance card with outside, supply, inside and exhaust in that order reads as the journey air takes through the unit, left to right.
-- **A history graph is the one to keep.** Put supply, outside and inside temperature on one 24-hour graph. The gap between the outside line and the supply line *is* your heat recovery, drawn over time - the single most satisfying thing this integration gives you.
+- **A history graph is the one to keep.** Put supply, outside and inside temperature on one 24-hour graph. The gap between the outside line and the supply line *is* your heat recovery, drawn over time.
 - **Everything else on an entities card.** Airflow, humidity, bypass state, power draw, filter days. Useful to have, not worth a card each.
 
 ---
 
-*Written against a live ComfoConnect LAN C paired to a ComfoAir Q. Entity IDs, resource keys, units and sample values were read from that installation rather than transcribed from documentation. The ComfoConnect Pro section is drawn from Zehnder's published installer manual rather than from a tested install, and is marked as such.*
+*Written against a live ComfoConnect LAN C paired to a ComfoAir Q. Entity IDs, resource keys, units and sample values were read from that installation. The ComfoConnect Pro section is drawn from Zehnder's published installer manual, and is marked throughout as untested.*
 
 *Not affiliated with or endorsed by Zehnder. Check your unit's warranty terms before changing how it is controlled.*
