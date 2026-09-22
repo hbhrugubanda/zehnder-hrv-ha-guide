@@ -1,63 +1,53 @@
 # Zehnder ComfoAir Q + Home Assistant
 
-**A short guide to connecting a Zehnder ComfoAir Q heat recovery unit to Home Assistant, and what you can do with it once it's there.**
+**A guide to connecting a Zehnder ComfoAir Q MVHR to Home Assistant, and what you can do with it**
 
 Repository: <https://github.com/hbhrugubanda/zehnder-hrv-ha-guide>
 
 ---
 
-## What this assumes
-
-You already have all of this working:
+## Assumptions
 
 - A **Zehnder ComfoAir Q** (Q350 / Q450 / Q600), installed and running.
-- A **[ComfoConnect LAN C](#1a-the-comfoconnect-lan-c)** or **[ComfoConnect Pro](#1b-the-comfoconnect-pro)** - the small Zehnder device that puts the unit on your network - plugged in and working in the Zehnder app.
-- A running **Home Assistant**, and you know that device's IP address.
+- A **[ComfoConnect LAN C](#1a-the-comfoconnect-lan-c)** or **[ComfoConnect Pro](#1b-the-comfoconnect-pro)** - a small device that connects to your network.
+- A running **Home Assistant** on your network.
 
 If the Zehnder app can see your unit, you have everything you need. This guide covers only the Home Assistant side.
 
-**Which sections you need depends on your box.** Read **1a** and **2a** for a LAN C, **1b** and **2b** for a Pro. Sections 3 to 5 describe the LAN C; the ideas carry over to a Pro, though it reports a different set of values under different names. The LAN C route is the tested one.
-
-Everything below was read off a live LAN C install. Where something has *not* been verified, it says so.
+**Relevant sections depend on your installation.** Read **1a** and **2a** for a LAN C, **1b** and **2b** for a Pro. Sections 3 to 5 describe the LAN C; the ideas carry over to a Pro, though it reports a different set of values under different names.
 
 Written against **Home Assistant 2026.9.2**, September 2026. Menu names shift between releases - *Tools* was called *Developer tools* and sat in the sidebar before 2026.2, and *Apps* were *Add-ons* before 2026.6 - so if a path here doesn't match your screen, look for the nearest equivalent under *Settings*.
 
 ---
 
 ## 1a. The ComfoConnect LAN C
+Complete the following before you start:
 
-The ComfoAir Q has no network connection of its own. The **ComfoConnect LAN C** is the small separate box that gives it one - it wires into the unit at one end and into your network at the other. Home Assistant talks to that box, not to the unit itself, and it all happens on your own network with nothing going via Zehnder's servers.
+- **Set a fixed address.** The LAN C IP address is set for Home Assistant and shouldn't change. Find it in your router's list of connected devices, then set a **DHCP reservation** or **Fixed IP Address** so it can't change.
 
-Sort these two before you start:
-
-- **Give it a fixed address.** Home Assistant is told the LAN C's IP address once and never looks it up again. Find it in your router's list of connected devices, then set a **DHCP reservation** so it can't change later.
-- **Keep its client list short.** Only a handful of things can be registered to it at once - phone app, tablet, Home Assistant. If Home Assistant drops out whenever you open the Zehnder app, remove registrations you no longer use.
-
-Zehnder now sells the **ComfoConnect Pro** in its place. Different box, different setup - see *[section 1b](#1b-the-comfoconnect-pro)*.
+LAN C is superceded by the **ComfoConnect Pro**. It has a different setup - see *[section 1b](#1b-the-comfoconnect-pro)*. Home Assistant's built-in integration only communicates with the LAN C.
 
 ---
 
 ## 1b. The ComfoConnect Pro
 
-The **ComfoConnect Pro** is Zehnder's current box, the replacement for the LAN C. It does the same job of joining the unit to your network, but it is a different device, and **section 2a does not apply to it**. Home Assistant's built-in integration only speaks the LAN C's language.
+The **ComfoConnect Pro** similarly connects your unit to your home network. It has to be set up first. Press the **AP** button, join the temporary **ComfoConnectPro** Wi-Fi network it creates (password on the device label), and open **http://comfoconnectpro.local** in a browser. From there, connect it to your home network - ethernet or Wi-Fi - and give it a fixed address in your router.
 
-It has to be set up first, and it does not arrive ready. Press the **AP** button, join the temporary **ComfoConnectPro** Wi-Fi network it creates (password on the device label), and open **http://comfoconnectpro.local** in a browser. From there, put it on your home network - ethernet or Wi-Fi - and give it a fixed address in your router.
-
-Then, on that same web page, go to **Protocols & Services** and switch the protocol to **Modbus TCP**. Leave the defaults alone: slave ID 1, port 502. Nothing in Home Assistant can see the Pro until that is on.
+Then, on that same web page, go to **Protocols & Services** and switch the protocol to **Modbus TCP**. Leave the defaults alone: slave ID 1, port 502. Home Assistant can't see the Pro until that is set.
 
 Once that is done, carry on to **section 2b**.
 
-> **Researched, not tested.** The rest of this guide was written against a live LAN C. This section comes from Zehnder's own [ComfoConnect PRO installer manual](https://zehnder.lv/wp-content/uploads/2024/12/ComfoConnect-PRO-Installer-manual.pdf), which documents the setup and the full Modbus interface - so the details are Zehnder's, but nobody has yet proved the round trip to Home Assistant end to end. Corrections welcome.
+> **Researched, not tested.** The rest of this guide was written against a live LAN C. This section comes from Zehnder's own [ComfoConnect PRO installer manual](https://zehnder.lv/wp-content/uploads/2024/12/ComfoConnect-PRO-Installer-manual.pdf), which documents the setup and the full Modbus interface.
 
 ---
 
 ## 2a. Connect a LAN C to Home Assistant
 
-**You do not need HACS**, the community store other guides send you to, and there is nothing for you to install. An integration called **[Zehnder ComfoAir Q](https://www.home-assistant.io/integrations/comfoconnect/)** already ships with Home Assistant, as part of Home Assistant itself. That is why it has a page on the official documentation site, with no repository to add. What throws people is that it is also one of the few with **no setup screen**. You won't find it under *Settings → Devices & Services*; you add it by editing a text file and restarting. That combination is unusual, and it is expected.
+An integration called **[Zehnder ComfoAir Q](https://www.home-assistant.io/integrations/comfoconnect/)** already ships with Home Assistant, as part of Home Assistant itself.
 
-**Take a backup first** - *Settings → System → Backups*. You are about to edit the file Home Assistant reads on startup, and a stray space in it can stop Home Assistant starting.
+**Take a backup first** - *Settings → System → Backups*. You are about to edit the file Home Assistant reads on startup, so a backup will help if something goes wrong.
 
-Now open `configuration.yaml` and add the block below to the bottom of it, changing the IP to your Zehnder device's. The easiest way in is the **File editor** app under *Settings → Apps*; if you don't have it, install it from that screen first. (Running Home Assistant in Docker or a Python environment? You won't have Apps - edit the file however you normally reach it.)
+Now open `configuration.yaml` and add the block below to the bottom of it. Change the IP to your Zehnder device's. The easiest way in is the **File editor** app under *Settings → Apps*.
 
 ```yaml
 comfoconnect:
@@ -92,42 +82,40 @@ sensor:
 
 Then:
 
-1. **Settings → Tools → YAML → Check configuration.** Fix anything it flags - the error names the line. (On Home Assistant older than 2026.2, *Tools* is called *Developer tools* and sits in the sidebar instead.)
+1. **Settings → Tools → YAML → Check configuration.** Fix anything it flags - the error identifies the line.
 2. **Settings → System →** power icon → **Restart Home Assistant.**
-3. **Settings → Tools → States**, filter for `comfoairq`. You should see one `fan.comfoairq` and twenty-one sensors with live numbers.
+3. **Settings → Tools → States**, filter for `comfoairq`. You should see one `fan.comfoairq` and other sensors with live numbers.
 
-Those are your **entities** - Home Assistant's word for one controllable thing or one reading. Each has an **entity ID** like `sensor.comfoairq_inside_temperature`, and that ID is what you point automations and dashboards at for the rest of this guide.
+Those are your **entities**; each has an **entity ID** like `sensor.comfoairq_inside_temperature`, and that ID is what you can reference for automations and dashboards.
 
 Three things to watch:
 
 - If `sensor:` already exists at the far left of your file, don't add a second one. Move just the `- platform: comfoconnect` part underneath the existing `sensor:` line.
-- `name: ComfoAirQ` decides what every entity is called. Leave it alone and every example below works as written.
+- `name: ComfoAirQ` decides what every entity is called.
 - Any later change to this block needs another **restart**, not a YAML reload.
 
 ---
 
 ## 2b. Connect a Pro to Home Assistant
 
-A Pro speaks **Modbus**, so the integration in 2a is no use here. Either of these works:
+A Pro speaks **Modbus**, use either of the following:
 
-- **[hstrohmaier/ha_comfoconnectpro](https://github.com/hstrohmaier/ha_comfoconnectpro)**, added to HACS as a custom repository. It asks for the address, slave ID and port from section 1b, and does the rest. Written against a ComfoAir Q350.
-- **Home Assistant's own Modbus integration**, which is built in and needs nothing downloaded. More setting up - you list the values you want yourself, in `configuration.yaml` - but nothing third-party involved.
+- **[hstrohmaier/ha_comfoconnectpro](https://github.com/hstrohmaier/ha_comfoconnectpro)**, added to HACS as a custom repository. It asks for the address, slave ID and port from section 1b.
+- **Home Assistant's own Modbus integration**, which is built in and needs nothing downloaded. More setting up - you list the values you want yourself, in `configuration.yaml`.
 
-Either way you end up with the unit as entities in Home Assistant, and the rest of the guide still gives you the ideas. Read it for the shape: your entity names will differ from the `comfoairq` ones in the examples, and the Pro reports a different set of values.
+Either way you end up with the unit as entities in Home Assistant and can then incorporate them into automations and dashboards.
 
-The two boxes don't offer the same things. The Pro **can** do what the LAN C can't: away mode, a timed boost, a temperature target, and clearing errors. It also reports CO2 per zone, where sensors are fitted. What it **doesn't** report is fan speed, fan duty, power or energy - so the fan and electricity readings in section 3 have no Pro equivalent.
+The two boxes don't offer the same things. The Pro **can additionally** do: away mode, a timed boost, a temperature target, and clearing errors. It also reports CO2 per zone, where sensors are fitted. What it **doesn't** report is fan speed, fan duty, power or energy.
 
 ---
 
 ## 3. What you get
 
-*Written for the LAN C. A Pro exposes a different set, under different names - see section 1b.*
-
-One control and twenty-one readings.
+*Written for the LAN C. A Pro exposes a different set.*
 
 ### The control
 
-`fan.comfoairq` is the unit itself. It has four speeds, matching the wall controller - there is no 50%.
+`fan.comfoairq` is the unit itself. It has four speeds:
 
 | Setting | Percentage |
 |---|---|
@@ -140,8 +128,6 @@ Setting a percentage puts the unit into **manual** mode and leaves it there. Set
 
 ### The four air streams
 
-Your unit is an **MVHR** - mechanical ventilation with heat recovery. It moves air along four paths at once, and warms the incoming air with heat taken from the outgoing air. Understanding those four paths is what turns a wall of numbers into something useful.
-
 One naming quirk to know first: Zehnder's manuals call the air pulled out of your rooms **extract** air, while Home Assistant calls it **inside** and keeps **exhaust** for the air leaving the building.
 
 | Stream | Meaning | Temperature | Humidity | Live |
@@ -151,7 +137,7 @@ One naming quirk to know first: Zehnder's manuals call the air pulled out of you
 | **Inside** | Stale air pulled out of kitchen and bathrooms | `sensor.comfoairq_inside_temperature` | `sensor.comfoairq_inside_humidity` | 18.8 °C · 59% |
 | **Exhaust** | Spent air leaving the building, heat removed | `sensor.comfoairq_exhaust_temperature` | `sensor.comfoairq_exhaust_humidity` | 13.8 °C · 79% |
 
-> Read those together. Outside air arrived at 12.7 °C and reached the rooms at 18.3 °C. Inside air left the rooms at 18.8 °C and exited the building at 13.8 °C. The unit moved about 5.6 degrees of warmth from the outgoing air into the incoming air, for 43 watts of fan power. That comparison is the clearest picture of heat recovery you'll get, and it's the main reason to put this in Home Assistant at all.
+> Read those together. Outside air arrived at 12.7 °C and reached the rooms at 18.3 °C. Inside air left the rooms at 18.8 °C and exited the building at 13.8 °C.
 
 ### Everything else
 
@@ -185,14 +171,12 @@ The integration is read-mostly. Plan around these limits:
 
 ## 4. Automation ideas
 
-This is where the unit gets smarter than its wall controller.
-
-None of these are recipes to copy. Each is one trigger and one or two actions, built under **Settings → Automations & Scenes → Create automation** with the visual editor - no YAML needed. Two entities do nearly all the work:
+None of these are recipes to copy. Each is one trigger and one or two actions, built under **Settings → Automations & Scenes → Create automation** with the visual editor - no YAML needed. Two entities can aid with this control:
 
 - **`fan.comfoairq`** - the unit itself. Either *set percentage* (33 Low, 66 Medium, 100 High) or *set preset mode* back to `auto`.
 - **`sensor.comfoairq_*`** - the numbers you trigger on.
 
-> **The one rule.** Setting a percentage takes the unit out of automatic mode and leaves it there. Every boost must finish by setting the preset back to `auto`, or the unit sits at that speed indefinitely.
+> **The one rule.** Setting a percentage takes the unit out of automatic mode and leaves it there. Every boost must finish by setting the preset back to `auto`.
 
 ### Boost when the air gets humid
 
