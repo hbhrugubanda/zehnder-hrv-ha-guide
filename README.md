@@ -102,8 +102,16 @@ Things to watch:
 
 A Pro speaks **Modbus**. Use either of the following:
 
-- **[ComfoConnect PRO](https://github.com/hstrohmaier/ha_comfoconnectpro)**, a community integration listed in HACS - search for it there. It asks for a name, the Pro's address, the slave ID and the port from section 1b.
+- **[Zehnder ComfoConnect Pro](https://github.com/hstrohmaier/ha_comfoconnectpro)**, a community integration listed in HACS. It asks for a name, the Pro's address, the slave ID and the port from section 1b.
+  1. If you don't have HACS yet, [download it](https://hacs.xyz/docs/use/download/download/) and [set it up](https://hacs.xyz/docs/use/configuration/basic/) first.
+  2. Open the integration in HACS with [this link](https://my.home-assistant.io/redirect/hacs_repository/?owner=hstrohmaier&repository=ha_comfoconnectpro&category=integration), or search HACS for *Zehnder ComfoConnect Pro* ([using the HACS dashboard](https://hacs.xyz/docs/use/repositories/dashboard/)).
+  3. Download it and restart Home Assistant.
+  4. Add it under *Settings → Devices & Services → Add integration*, searching for *Zehnder ComfoConnect PRO*.
 - **Home Assistant's own Modbus integration**, which is built in and needs nothing downloaded. More setting up - you list the values you want yourself, in `configuration.yaml`.
+  - The [Modbus integration documentation](https://www.home-assistant.io/integrations/modbus/) shows how to write the `modbus:` block.
+  - [Zehnder's register list](https://zehnder.lv/wp-content/uploads/2024/12/ComfoConnect-PRO-Installer-manual.pdf#page=21), pages 21-22 of the installer manual, shows which register holds which value.
+  - Zehnder's list numbers registers from 1, and the manual notes that Modbus addresses start at 0, so register 1 is `address: 0` in your configuration.
+  - New to `configuration.yaml`? Home Assistant's [configuration guide](https://www.home-assistant.io/docs/configuration/) covers where it lives and how to edit it.
 
 Either way you end up with the unit as entities in Home Assistant and can then incorporate them into automations and dashboards.
 
