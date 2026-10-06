@@ -173,38 +173,28 @@ The integration is read-mostly. Plan around these limits:
 
 ## 4. Automation ideas
 
-None of these are recipes to copy. Each is one trigger and one or two actions, built under **Settings → Automations & Scenes → Create automation** with the visual editor - no YAML needed. Two kinds of entity do most of the work:
+Here are a list of automation ideas. Each is a trigger and one or two actions, built under **Settings → Automations & Scenes → Create automation** with the visual editor - no YAML needed. Two kinds of entity do most of the work:
 
 - **`fan.comfoairq`** - the unit itself. Either *set percentage* (33 Low, 66 Medium, 100 High) or *set preset mode* back to `auto`.
 - **`sensor.comfoairq_*`** - the numbers you trigger on.
 
-> **The one rule.** Setting a percentage takes the unit out of automatic mode and leaves it there. Every boost must finish by setting the preset back to `auto`.
+> **Note:** Setting a percentage takes the unit out of automatic mode and leaves it there. Every boost must finish by setting the preset back to `auto`.
 
 ### Boost when the air gets humid
 
 Start with this one. It needs no extra hardware, since it runs off the unit's own extract humidity sensor.
 
-**When** `sensor.comfoairq_inside_humidity` stays above 70% for five minutes → **run** the fan at 100% → **wait** until it drops back below 63%, giving up after an hour → **set preset to `auto`**.
+**When** `sensor.comfoairq_inside_humidity` stays above 70% for five minutes → **run** the fan at 100% → **wait** until it drops back below 63%, giving up after an hour → **set preset to `auto`**. You can adjust the thresholds as required.
 
-**Picking your numbers.** That sensor measures the air being pulled out of your wet rooms, so it rises whenever anyone showers, cooks or dries laundry - one trigger covering the whole house. But it is a blend of every extract point, so it moves more slowly and less sharply than a sensor sitting in the bathroom itself.
-
-Set the thresholds from your own baseline. Click the sensor in Home Assistant, look at a week of history, and note where it normally sits - on the reference unit that's around 59%. Trigger roughly 10 points above that, and release about 4 points above it. Hence 70% and 63%. If the boost never fires, lower the trigger; if it fires while nothing is happening, raise it.
-
-Two settings matter here. The five minute delay on the trigger stops a brief blip causing a boost. Setting the automation's run mode to **Restart** lets a second shower mid-boost restart the timer, so the automation still runs.
-
-A humidity sensor in the bathroom itself is the upgrade here, reacting within seconds. Use it in place of the extract sensor if you add one.
+**Picking your numbers.** That sensor measures the air being pulled out of your wet rooms, so it rises whenever anyone showers, cooks or dries laundry - one trigger covering the whole house. But it is a blend of every extract point, so it moves more slowly and less sharply than a sensor sitting in the bathroom itself. You could also use a humidity sensor in the bathroom itself instead of the extract sensor.
 
 ### Boost while the rangehood runs
 
-An idea to adapt, most useful if your hood recirculates. A recirculating hood filters grease and some odour, then blows the air straight back into the room - the smells never leave the house. Boosting the unit while the hood runs gives them somewhere to go. Whether that is worth automating depends on your kitchen.
+This is mostly useful if your kitchen rangehood recirculates. A recirculating hood filters grease and some odour, then blows the air straight back into the room - the smells never leave the house. Boosting the unit while the hood runs gives them somewhere to go if the HRV extract is close by. Whether that is worth automating depends on your kitchen.
 
 **When** the rangehood switches on → **run** the fan at 100% → **wait** until it switches off, giving up after two hours → **wait** a further 15 minutes → **set preset to `auto`**.
 
-The run-on does most of the work - smells outlast the cooking. The two hour cutoff means a hood left on all day cannot leave the unit stuck at full speed.
-
-**If your rangehood isn't smart**, and most aren't, trigger on a power-monitoring smart plug instead: boost when its power sensor goes above roughly 20 W and release below 10 W, adjusted to whatever the hood actually draws. The hood light works as a rougher proxy.
-
-Two limits apply. The unit raises supply and extract together, so a boost moves more air both ways and you cannot lift incoming air alone. And a **ducted** hood already extracts far more than the unit can, so the boost adds little there; in a house with an open-flued appliance, a powerful ducted hood raises a backdraft question for a heating engineer. Either way, never duct a rangehood into the MVHR - the grease has nowhere good to go.
+**You can work out if your rangehood is on** with a power-monitoring smart plug instead: boost when its power sensor goes above roughly 20 W and release below 10 W, adjusted to whatever the hood actually draws.
 
 ### Wind down when the house is empty
 
@@ -214,7 +204,7 @@ This one takes two automations.
 
 **When** it rises above 0 → **set preset to `auto`**.
 
-Both need Home Assistant to know who's home - the companion app on at least one phone with location sharing on. Without that, skip them.
+Both need Home Assistant to know who's home - the companion app on at least one phone with location sharing on.
 
 ### Summer night purge
 
@@ -234,27 +224,15 @@ Find your own notification action under **Settings → Tools → Actions** by ty
 
 Things the sensors support that are worth building once the basics work:
 
-- **CO₂ boost** - if you own an air quality sensor, boost on CO₂ rather than humidity. Better proxy for "too many people in here".
+- **CO₂ boost** - if you own an air quality sensor, boost on CO₂ rather than humidity.
 - **Quiet overnight** - drop to Low at bedtime, back to `auto` in the morning. Worth it if the unit is audible in a bedroom.
-- **Pollen or poor air quality outside** - drop to Low when an outdoor air quality sensor spikes, so you pull in less of it.
-- **Frost warning** - notify when `preheater_power_usage` goes above zero for a sustained period. It means the unit is spending real electricity fighting the cold.
-- **Bypass watch** - you can't control the bypass, but you can chart `bypass_state` against indoor and outdoor temperature to see whether the unit's own logic is behaving.
+- **Pollen or poor air quality outside** - drop to Low when an outdoor air quality sensor spikes.
+- **Bypass watch** - you can't control the bypass, but you can chart `bypass_state` against indoor and outdoor temperature to see whether the unit is doing its job.
 - **Efficiency tracking** - a template sensor comparing supply, outside and inside temperatures gives you a live heat recovery percentage to trend over months.
 - **Watch the filters age** - chart filter days against `supply_fan_duty`; a clogging filter shows up as rising fan duty for the same airflow.
 
 ---
 
-## 5. Putting it on a dashboard
-
-Home Assistant builds a dashboard automatically, so every entity is already on one and the job is arranging them. Build what suits you. A few pointers for a ventilation unit:
-
-- **The fan tile.** A tile card on `fan.comfoairq` with the *fan speed* feature gives you the whole control surface: current speed, and four buttons to change it.
-- **Temperatures side by side.** A glance card with outside, supply, inside and exhaust in that order reads as the journey air takes through the unit, left to right.
-- **A history graph is the one to keep.** Put supply, outside and inside temperature on one 24-hour graph. The gap between the outside line and the supply line *is* your heat recovery, drawn over time.
-- **Everything else on an entities card.** Airflow, humidity, bypass state, power draw, filter days. One card holds them all.
-
----
-
-*Written against a live ComfoConnect LAN C paired to a ComfoAir Q. Entity IDs, resource keys, units and sample values were read from that installation. The ComfoConnect Pro section is drawn from Zehnder's published installer manual, and is marked as untested.*
+*Written against a live ComfoConnect LAN C paired to a ComfoAir Q. Entity IDs, resource keys, units and sample values were read from that installation. The ComfoConnect Pro section is drawn from Zehnder's published installer manual, and is untested.*
 
 *Not affiliated with or endorsed by Zehnder. Check your unit's warranty terms before changing how it is controlled.*
