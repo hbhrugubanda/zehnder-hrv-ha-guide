@@ -228,7 +228,7 @@ That second condition compares one sensor against another, since Home Assistant 
 
 Find your own notification action under **Settings → Tools → Actions** by typing `notify` - the name depends on which phone has the companion app installed.
 
-### Further ideas, sketched
+### Further ideas
 
 Things the sensors support that are worth building once the basics work:
 
@@ -242,5 +242,3 @@ Things the sensors support that are worth building once the basics work:
 ---
 
 *Written against a live ComfoConnect LAN C paired to a ComfoAir Q. Entity IDs, resource keys, units and sample values were read from that installation. The ComfoConnect Pro section is drawn from Zehnder's published installer manual, and is untested.*
-
-*Not affiliated with or endorsed by Zehnder. Check your unit's warranty terms before changing how it is controlled.*
