@@ -16,7 +16,7 @@ If the Zehnder app can see your unit, you have everything you need. This guide c
 
 **Relevant sections depend on your installation.** Read **1a** and **2a** for a LAN C, **1b** and **2b** for a Pro. Sections 3 to 5 describe the LAN C; the ideas carry over to a Pro, though it reports a different set of values under different names.
 
-Written against **Home Assistant 2026.9.2**, September 2026. Menu names shift between releases - *Tools* was called *Developer tools* and sat in the sidebar before 2026.2, and *Apps* were *Add-ons* before 2026.6 - so if a path here doesn't match your screen, look for the nearest equivalent under *Settings*.
+Written against **Home Assistant 2026.11.1**, November 2026. Menu names shift between releases - *Tools* sat in the sidebar before 2026.2 and was called *Developer tools* before 2026.8, *Apps* were *Add-ons* before 2026.2, and the *Marketplace* was a separate download called HACS before 2026.11 - so if a path here doesn't match your screen, look for the nearest equivalent under *Settings*.
 
 ---
 
@@ -32,9 +32,14 @@ The LAN C has been superseded by the **ComfoConnect Pro**, which has a different
 
 ## 1b. The ComfoConnect Pro
 
-The **ComfoConnect Pro** similarly connects your unit to your home network. It has to be set up first. Press the **AP** button, join the temporary **ComfoConnectPro** Wi-Fi network it creates (password on the device label), and open **http://comfoconnectpro.local** in a browser (or **http://10.1.1.1** if that doesn't load). The first visit asks you to set a password for the Pro's settings page; log in with it. From there, connect the Pro to your home network - ethernet or Wi-Fi - and give it a fixed address in your router.
+The **ComfoConnect Pro** similarly connects your unit to your home network. It has to be set up first. Press the **AP** button, join the temporary **ComfoConnectPro** Wi-Fi network it creates (password on the device label), and open **http://comfoconnectpro.local** in a browser (or **http://10.1.1.1** if that doesn't load). The first visit asks you to set a password for the Pro's settings page; log in with it.
 
-Then, on that same web page, go to **Protocols & Services** and switch the protocol to **Modbus TCP**. Leave the defaults alone: slave ID 1, port 502. Home Assistant can't see the Pro until that is set.
+Next, connect the Pro to your home network:
+
+- **Ethernet:** plug a cable from your router or switch into the Pro.
+- **Wi-Fi:** on the settings page, go to **Network**, open the Wi-Fi section and switch **Access Point** off. Pick your network, enter its password and select **Apply Configuration**. The Pro restarts and joins your network, and its temporary network goes away.
+
+Either way, give it a fixed address in your router. Then, from a device on your home network, open the settings page again at the Pro's new address, go to **Protocols & Services** and switch the protocol to **Modbus TCP**. Leave the defaults alone: slave ID 1, port 502. Home Assistant can't see the Pro until that is set.
 
 Once that is done, carry on to **section 2b**.
 
@@ -48,7 +53,7 @@ An integration called **[Zehnder ComfoAir Q](https://www.home-assistant.io/integ
 
 **Take a backup first** - *Settings → System → Backups*. You are about to edit the file Home Assistant reads on startup, so a backup will help if something goes wrong.
 
-Now open `configuration.yaml` and add the block below to the bottom of it. Change the IP to your LAN C's. The easiest way in is the **File editor** app under *Settings → Apps*.
+Now open `configuration.yaml` and add the block below to the bottom of it. Change the IP to your LAN C's. On Home Assistant OS, the easiest way in is the **File editor** app under *Settings → Apps*. A Docker (Container) install has no apps: open the file in the config folder you mounted into the container, with any text editor.
 
 ```yaml
 comfoconnect:
@@ -102,20 +107,22 @@ Things to watch:
 
 A Pro speaks **Modbus**. Use either of the following:
 
-- **[Zehnder ComfoConnect Pro](https://github.com/hstrohmaier/ha_comfoconnectpro)**, a community integration listed in HACS. It asks for a name, the Pro's address, the slave ID and the port from section 1b.
-  1. If you don't have HACS yet, [download it](https://hacs.xyz/docs/use/download/download/) and [set it up](https://hacs.xyz/docs/use/configuration/basic/) first.
-  2. Open the integration in HACS with [this link](https://my.home-assistant.io/redirect/hacs_repository/?owner=hstrohmaier&repository=ha_comfoconnectpro&category=integration), or search HACS for *Zehnder ComfoConnect Pro* ([using the HACS dashboard](https://hacs.xyz/docs/use/repositories/dashboard/)).
-  3. Download it and restart Home Assistant.
-  4. Add it under *Settings → Devices & Services → Add integration*, searching for *Zehnder ComfoConnect PRO*.
+- **[Zehnder ComfoConnect Pro](https://github.com/hstrohmaier/ha_comfoconnectpro)**, a community integration listed in the Home Assistant **Marketplace**. It asks for a name, the Pro's address, the slave ID and the port from section 1b. It is in the Marketplace's own catalogue, so you don't need a GitHub account.
+  1. Open **Settings → Marketplace**. The first time, it shows a warning that community projects are not reviewed by Home Assistant. Select **I understand the risks and agree** - nothing can be installed until you do.
+  2. Open the integration with [this link](https://my.home-assistant.io/redirect/marketplace_repository/?owner=hstrohmaier&repository=ha_comfoconnectpro&category=integration), or search the Marketplace for *Zehnder ComfoConnect Pro*.
+  3. Select **Install**, check the version, and select **Install** again.
+  4. Home Assistant should open the setup form straight away. If it doesn't, restart Home Assistant, then add it under *Settings → Devices & Services → Add integration*, searching for *Zehnder ComfoConnect PRO*.
+
+  On Home Assistant 2026.10 or older there is no Marketplace. [Download HACS](https://hacs.xyz/docs/use/download/download/) and [set it up](https://hacs.xyz/docs/use/configuration/basic/) first, then follow the same steps in HACS, restarting Home Assistant after the download.
 - **Home Assistant's own Modbus integration**, which is built in and needs nothing downloaded. More setting up - you list the values you want yourself, in `configuration.yaml`.
   - The [Modbus integration documentation](https://www.home-assistant.io/integrations/modbus/) shows how to write the `modbus:` block.
-  - [Zehnder's register list](https://zehnder.lv/wp-content/uploads/2024/12/ComfoConnect-PRO-Installer-manual.pdf#page=21), pages 21-22 of the installer manual, shows which register holds which value.
-  - Zehnder's list numbers registers from 1, and the manual notes that Modbus addresses start at 0, so register 1 is `address: 0` in your configuration.
+  - [Zehnder's register list](https://zehnder.lv/wp-content/uploads/2024/12/ComfoConnect-PRO-Installer-manual.pdf#page=21), pages 21-22 of the installer manual, shows which register holds which value. It writes register numbers in hexadecimal, so 0x000A is register 10.
+  - Zehnder's list numbers registers from 1, and the manual notes on page 23 that Modbus addresses start at 0, so register 1 is `address: 0` in your configuration.
   - New to `configuration.yaml`? Home Assistant's [configuration guide](https://www.home-assistant.io/docs/configuration/) covers where it lives and how to edit it.
 
 Either way you end up with the unit as entities in Home Assistant and can then incorporate them into automations and dashboards.
 
-The two devices offer different features. The Pro adds away mode, a timed boost, a temperature target and error clearing, and reports CO₂ per zone where sensors are fitted. It does not report fan speed, fan duty, power or energy.
+The two devices offer different features. The Pro adds away mode, a timed boost, a temperature target and error clearing, and reports CO₂ per zone where sensors are fitted. It does not report fan speed, fan duty, power, energy, bypass position or the running mean outdoor temperature, and gives one airflow figure where the LAN C gives two.
 
 ---
 
