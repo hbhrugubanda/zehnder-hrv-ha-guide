@@ -107,11 +107,13 @@ Things to watch:
 
 A Pro speaks **Modbus**. Use either of the following:
 
-- **[Zehnder ComfoConnect Pro](https://github.com/hstrohmaier/ha_comfoconnectpro)**, a community integration listed in the Home Assistant **Marketplace**. It asks for a name, the Pro's address, the slave ID and the port from section 1b. It is in the Marketplace's own catalogue, so you don't need a GitHub account.
-  1. Open **Settings → Marketplace**. The first time, it shows a warning that community projects are not reviewed by Home Assistant. Select **I understand the risks and agree** - nothing can be installed until you do.
-  2. Open the integration with [this link](https://my.home-assistant.io/redirect/marketplace_repository/?owner=hstrohmaier&repository=ha_comfoconnectpro&category=integration), or search the Marketplace for *Zehnder ComfoConnect Pro*.
+- **[Zehnder ComfoConnect Pro](https://github.com/hstrohmaier/ha_comfoconnectpro)**, a community integration listed in the Home Assistant **Marketplace**. It is in the Marketplace's own catalogue, so you don't need a GitHub account.
+  1. Open **Settings → Marketplace**. The first time, it warns that anything you install can control your whole Home Assistant. Tick **I understand the risks and agree**, then select **Continue** - nothing can be installed until you do.
+  2. Open the integration with [this link](https://my.home-assistant.io/redirect/marketplace_repository/?owner=hstrohmaier&repository=ha_comfoconnectpro&category=integration), or search the Marketplace for *Zehnder ComfoConnect Pro*. The first time you use a link like this, it asks for your Home Assistant's address. It suggests `http://homeassistant.local:8123`, which is usually right: select **Save**, then **Open link**.
   3. Select **Install**, check the version, and select **Install** again.
-  4. Home Assistant should open the setup form straight away. If it doesn't, restart Home Assistant, then add it under *Settings → Devices & Services → Add integration*, searching for *Zehnder ComfoConnect PRO*.
+  4. The setup form opens straight away. Fill in the Pro's address under **Host**, and leave **Port** (502), **Host ID** (the slave ID, 1) and **Scan interval** as they are unless you changed them in section 1b. Select **Submit**.
+
+  If you close the form, select **Set up** on the same page, or add it later under *Settings → Devices & Services → Add integration*, searching for *Zehnder ComfoConnect PRO*.
 
   On Home Assistant 2026.10 or older there is no Marketplace. [Download HACS](https://hacs.xyz/docs/use/download/download/) and [set it up](https://hacs.xyz/docs/use/configuration/basic/) first, then follow the same steps in HACS, restarting Home Assistant after the download.
 - **Home Assistant's own Modbus integration**, which is built in and needs nothing downloaded. More setting up - you list the values you want yourself, in `configuration.yaml`.
