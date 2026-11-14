@@ -53,7 +53,10 @@ An integration called **[Zehnder ComfoAir Q](https://www.home-assistant.io/integ
 
 **Take a backup first** - *Settings → System → Backups*. You are about to edit the file Home Assistant reads on startup, so a backup will help if something goes wrong.
 
-Now open `configuration.yaml` and add the block below to the bottom of it. Change the IP to your LAN C's. On Home Assistant OS, the easiest way in is the **File editor** app under *Settings → Apps*. A Docker (Container) install has no apps: open the file in the config folder you mounted into the container, with any text editor.
+Now open `configuration.yaml` and add the block below to the bottom of it. Change the IP to your LAN C's. How you open the file depends on how you installed Home Assistant:
+
+- **Home Assistant OS:** use the **File editor** app under *Settings → Apps*.
+- **Home Assistant Container (Docker):** there are no apps. Open the file in the config folder you mounted into the container, with any text editor.
 
 ```yaml
 comfoconnect:
